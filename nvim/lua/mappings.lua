@@ -91,3 +91,5 @@ map("n", "<leader>tt", function()
 	require("base46").toggle_theme()
 end, { desc = "Toggle Theme" })
 
+-- Telekasten
+-- map("n", "<leader>z", "<cmd>Telekasten panel<CR>")

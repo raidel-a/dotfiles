@@ -9,8 +9,21 @@ M.override = {
 	Comment = {
 		italic = true,
 	},
+
+	-- NormalFloat = {},
+	-- Normal = { bg = "none" },
+	-- Folded = {},
+	-- NvimTreeNormal = { bg = "none" },
+	-- NvimTreeNormalNC = { bg = "none" },
+	-- -- NvimTreeCursorLine = { underline = true },
+	-- TelescopeNormal = {},
+	-- TelescopePrompt = {},
+	-- TelescopeResults = {},
+	-- TelescopePromptNormal = {},
+	-- TelescopePromptPrefix = {},
 	-- CursorLine = { bold = true },
-  -- NvimTreeCursorLine = { underline = true },
+	-- Pmenu = {},
+	-- CmpPmenu = {},
 }
 
 ---@type HLTable

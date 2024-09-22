@@ -2,6 +2,10 @@ local wezterm = require("wezterm")
 local io = require("io")
 local os = require("os")
 
+local transparent = "rgba(0,0,0,1)"
+local CIRCLE = wezterm.nerdfonts.cod_circle_large
+local CIRCLE_FILLED = wezterm.nerdfonts.cod_circle_large_filled
+
 --- creates a second pane if there is only one pane in the current tab
 ---@param current_window any
 ---@param current_pane any
@@ -96,18 +100,22 @@ wezterm.on("format-tab-title", function(tab)
 		local process = get_last_segment(active_pane.foreground_process_name):lower()
 		local dir = get_last_segment(current_dir)
 		return { {
-			Text = ("%s  %s"):format(process_icons[process] or ("%s :"):format(process), dir),
+			Text = ("▏ %s  %s ▕"):format(process_icons[process] or (" %s : "):format(process), dir),
 		} }
 	end
 end)
 
 return {
-	window_background_opacity = 0.90,
-	macos_window_background_blur = 10,
-	window_decorations = "RESIZE",
+	integrated_title_button_style = "Gnome",
+	integrated_title_button_alignment = "Left",
+	integrated_title_buttons = { "Close", "Hide", "Maximize" },
+	use_fancy_tab_bar = false,
+	-- window_background_opacity = 0.85,
+	-- macos_window_background_blur = 20,
+	window_decorations = "INTEGRATED_BUTTONS|RESIZE",
 	window_frame = {
 		font_size = 13,
-		active_titlebar_bg = "#1a1b26",
+		inactive_titlebar_bg = "grey",
 	},
 	inactive_pane_hsb = {
 		saturation = 0.4,
@@ -142,22 +150,62 @@ return {
 	}),
 	font_size = 14,
 
+	-- ternary operator if 1 light 0 dark
+	-- color_scheme = (wezterm.gui.get_appearance():find("Dark") and "Ashes (dark) (terminal.sexy)" or "Ashes (light) (terminal.sexy)"),
+
 	color_scheme = "Tokyo Night",
 	colors = {
+		-- background = "#111",
 		tab_bar = {
+			background =  "black",
 			active_tab = {
-				bg_color = "#1a1b26",
+				bg_color = "#1C1E28",
 				fg_color = "#fefefe",
+				intensity = "Bold",
 			},
 			inactive_tab = {
-				bg_color = "#1a1b26",
+				bg_color = "black",
 				fg_color = "#808080",
+				italic = true,
 			},
 			new_tab = {
-				bg_color = "#1a1b26",
+				bg_color = "black",
 				fg_color = "#fefefe",
 			},
-			inactive_tab_edge = "#1a1b26",
+			inactive_tab_edge = "grey",
+			active_tab_edge = "white",
 		},
 	},
+	tab_bar_style = {
+		window_close = wezterm.format {
+			{ Background = { Color = "#000" } },
+			{ Foreground = { Color = "#F30710"} },
+			{ Text =  "  ".. CIRCLE .. " " },
+	},
+		window_close_hover = wezterm.format {
+			{ Background = { Color = "#000" } },
+			{ Foreground = { Color = "#F30710"} },
+			{ Text =  "  ".. CIRCLE_FILLED .. " " },
+	},
+		window_hide = wezterm.format {
+			{ Background = { Color = "#000" } },
+			{ Foreground = { Color = "#FEC907"} },
+			{ Text =  " ".. CIRCLE .. " " },
+	},
+		window_hide_hover = wezterm.format {
+			{ Background = { Color = "#000" } },
+			{ Foreground = { Color = "#FEC907"} },
+			{ Text =  " ".. CIRCLE_FILLED .. " " },
+	},
+    		window_maximize = wezterm.format {
+			{ Background = { Color = "#000" } },
+			{ Foreground = { Color = "#2FFF03"} },
+			{ Text =  " ".. CIRCLE .. "  " },
+	},
+    		window_maximize_hover = wezterm.format {
+			{ Background = { Color = "#000" } },
+			{ Foreground = { Color = "#2FFF03"} },
+			{ Text =  " ".. CIRCLE_FILLED .. "  " },
+	},
+}
 }

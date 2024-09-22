@@ -8,7 +8,7 @@ local highlights = require("highlights")
 M.base46 = {
 	theme = "poimandres",
 	theme_toggle = { "mountain", "poimandres" },
-	transparency = true,
+	transparency = false,
 
 	hl_override = highlights.override,
 	hl_add = highlights.add,
