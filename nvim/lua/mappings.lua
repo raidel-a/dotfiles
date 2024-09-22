@@ -93,3 +93,6 @@ end, { desc = "Toggle Theme" })
 
 -- Telekasten
 -- map("n", "<leader>z", "<cmd>Telekasten panel<CR>")
+
+-- sidebar-nvim
+-- map("n", "<Leader>sb", "<cmd>SidebarNvimToggle<CR>", { desc = "Toggle Sidebar" } )
