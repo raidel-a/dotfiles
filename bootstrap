@@ -9,3 +9,14 @@ ln -s "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
 # create root .zshenv symlink to .config/zsh/zshenv
 ln -s "$HOME/.config/zsh/zshenv" "$HOME/.zshenv"
 zsh
+
+
+# link=https://github.com/raidel-a/dotfiles/releases/download/v2.3.3/DroidSansMono.zip
+# name=DroidSansMono.zip
+# echo "Downloading fonts..."
+# echo "${link}"
+# wget $link
+# echo "Unzipping Font: ${name}..."
+# unzip $name -d ~/.fonts
+# fc-cache -fv
+# echo "Downloaded and unzipped ${name}"

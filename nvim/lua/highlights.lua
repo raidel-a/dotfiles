@@ -11,7 +11,7 @@ M.override = {
 	},
 
 	-- NormalFloat = {},
-	-- Normal = { bg = "none" },
+	Normal = { bg = "none" },
 	-- Folded = {},
 	-- NvimTreeNormal = { bg = "none" },
 	-- NvimTreeNormalNC = { bg = "none" },

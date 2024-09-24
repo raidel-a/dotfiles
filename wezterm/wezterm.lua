@@ -86,6 +86,8 @@ local process_icons = {
 	["zsh"] = wezterm.nerdfonts.cod_terminal,
 	["git"] = wezterm.nerdfonts.dev_git,
 	["python"] = wezterm.nerdfonts.dev_python,
+  ["spotify_player"] = wezterm.nerdfonts.md_spotify,
+
 }
 
 local get_last_segment = function(str)
@@ -94,15 +96,14 @@ end
 
 wezterm.on("format-tab-title", function(tab)
 	local active_pane = tab.active_pane
-	local current_dir = active_pane.current_working_dir.file_path
-	-- only set the title manually if the directory is available
-	if current_dir ~= nil then
-		local process = get_last_segment(active_pane.foreground_process_name):lower()
-		local dir = get_last_segment(current_dir)
-		return { {
-			Text = ("▏ %s  %s ▕"):format(process_icons[process] or (" %s : "):format(process), dir),
-		} }
-	end
+	local current_dir = active_pane.current_working_dir
+	local process = get_last_segment(active_pane.foreground_process_name):lower()
+	local dir = current_dir and get_last_segment(current_dir.file_path) or "No Directory"
+	local process_icon = process_icons[process] or (" %s "):format(process)
+	local title = active_pane.title or "No Title"
+	return {
+		{ Text = (" %s  %s  %s "):format(process_icon, dir, title) },
+	}
 end)
 
 return {
@@ -114,11 +115,11 @@ return {
 	-- macos_window_background_blur = 20,
 	window_decorations = "INTEGRATED_BUTTONS|RESIZE",
 	window_frame = {
-		font_size = 13,
+		font_size = 14,
 		inactive_titlebar_bg = "grey",
 	},
 	inactive_pane_hsb = {
-		saturation = 0.4,
+		saturation = 0.5,
 		brightness = 0.5,
 	},
 	keys = {
@@ -142,20 +143,17 @@ return {
 		},
 	},
 	font = wezterm.font_with_fallback({
-		-- Main font
-		-- "3270 Nerd Font",
 		"MapleMono Nerd Font",
 		-- Fallback to Nerd Font symbols if glyph is not available
 		"Symbols Nerd Font",
 	}),
 	font_size = 14,
 
-	-- ternary operator if 1 light 0 dark
 	-- color_scheme = (wezterm.gui.get_appearance():find("Dark") and "Ashes (dark) (terminal.sexy)" or "Ashes (light) (terminal.sexy)"),
 
 	color_scheme = "Tokyo Night",
 	colors = {
-		-- background = "#111",
+		-- background = "#15171E",
 		tab_bar = {
 			background =  "black",
 			active_tab = {
