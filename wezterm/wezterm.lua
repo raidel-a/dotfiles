@@ -1,109 +1,100 @@
 local wezterm = require("wezterm")
 local io = require("io")
 local os = require("os")
+local process_icons = require("process_icons")
 
-local transparent = "rgba(0,0,0,1)"
+local transparent = "rgba(0,0,0,0.0)"
 local CIRCLE = wezterm.nerdfonts.cod_circle_large
 local CIRCLE_FILLED = wezterm.nerdfonts.cod_circle_large_filled
 
---- creates a second pane if there is only one pane in the current tab
----@param current_window any
----@param current_pane any
----@return boolean did_create whether or not it did create a new pane
-local create_second_pane = function(current_window, current_pane)
-	local current_tab = current_window:active_tab()
-	local current_tab_pane_ids = current_tab:panes()
-	-- if current pane is the only pane in the tab, create a new horizontal split pane
-	if #current_tab_pane_ids == 1 then
-		current_window:perform_action(
-			wezterm.action.SplitPane({ direction = "Down", size = { Percent = 30 } }),
-			current_pane
-		)
-		return true
+function calculate_tab_width(window)
+	if not window or type(window.get_dimensions) ~= "function" then
+		return 200 -- default width
 	end
-	return false
+
+	local dimensions = window:get_dimensions()
+	local tabs = window:mux_window():tabs_with_info()
+	local num_tabs = #tabs
+
+	local available_width = dimensions.pixel_width - 10
+	local tab_width = math.floor(available_width / num_tabs)
+
+	return math.max(tab_width, 100)
 end
 
-wezterm.on("vim-mode", function(current_window, current_pane)
-	-- retrieve the last 300 lines of terminal output
-	local viewport_text = current_pane:get_lines_as_text(300)
-
-	-- create a temporary file to pass to vim
-	local tmpfile = os.tmpname()
-	local f, err = io.open(tmpfile, "w+")
-	if f == nil then
-		print(err)
-	else
-		f:write(viewport_text)
-		f:flush()
-		f:close()
-	end
-
-	-- Open a new window running vim and tell it to open the file
-	current_window:perform_action(
-		wezterm.action.SpawnCommandInNewWindow({
-			args = {
-				-- path to executable
-				"/opt/homebrew/bin/nvim",
-				-- temporary file name
-				tmpfile,
-				-- set cursor to last line
-				"+",
-				-- set filetype to sh for some best effor highlighting
-				"+set filetype=sh",
-			},
-		}),
-		current_pane
-	)
-
-	-- remove tmpfile after giving nvim time to read it
-	wezterm.sleep_ms(1000)
-	os.remove(tmpfile)
-end)
-
---- switch to the alternate pane of the current tab
-wezterm.on("alternate-pane", function(current_window, current_pane)
-	local did_create = create_second_pane(current_window, current_pane)
-	if not did_create then
-		current_window:perform_action(wezterm.action.ActivatePaneDirection("Next"), current_pane)
-	end
-end)
-
---- toggle zoom of the current pane to reveal the alternate-pane
-wezterm.on("alternate-zoom", function(current_window, current_pane)
-	local did_create = create_second_pane(current_window, current_pane)
-	if not did_create then
-		-- if two panes exist already, get the alternate pane (currently *not* selected pane)
-		current_window:perform_action(wezterm.action.TogglePaneZoomState, current_pane)
-	else
-		current_pane:activate()
-	end
-end)
-
-local process_icons = {
-	["nvim"] = wezterm.nerdfonts.custom_v_lang,
-	["node"] = wezterm.nerdfonts.dev_nodejs_small,
-	["zsh"] = wezterm.nerdfonts.cod_terminal,
-	["git"] = wezterm.nerdfonts.dev_git,
-	["python"] = wezterm.nerdfonts.dev_python,
-  ["spotify_player"] = wezterm.nerdfonts.md_spotify,
-
-}
-
-local get_last_segment = function(str)
-	return str:gsub("(.*[/\\])(.*)", "%2")
+local function get_last_segment(str)
+	return string.match(str, "([^/\\]+)$") or str
 end
 
-wezterm.on("format-tab-title", function(tab)
+local function get_nvim_cwd_and_file()
+	local cwd = vim.fn.getcwd()
+	local file_name = vim.fn.expand("%:t")
+	local dir_name = vim.fn.fnamemodify(cwd, ":t")
+	return dir_name .. "/" .. file_name
+end
+
+local left_bar = "\u{258F}" -- ▏
+local right_bar = "\u{2595}" -- ▕
+
+wezterm.on("format-tab-title", function(tab, tabs_max_width)
+	local window = wezterm.mux.get_window(tab.window_id)
+	local dynamic_max_width = window and calculate_tab_width(window) or 200
+
 	local active_pane = tab.active_pane
-	local current_dir = active_pane.current_working_dir
-	local process = get_last_segment(active_pane.foreground_process_name):lower()
-	local dir = current_dir and get_last_segment(current_dir.file_path) or "No Directory"
-	local process_icon = process_icons[process] or (" %s "):format(process)
-	local title = active_pane.title or "No Title"
-	return {
-		{ Text = (" %s  %s  %s "):format(process_icon, dir, title) },
-	}
+	local current_dir = active_pane.current_working_dir.file_path
+
+	if current_dir then
+		local process = get_last_segment(active_pane.foreground_process_name):lower()
+
+		-- Get the file name and extension
+		local file_name = active_pane.title or ""
+		local file_extension = file_name:match("%.%w+$") or "" -- Match the file extension
+
+		-- Determine what to display: file_name or dir
+		local display_name
+		if file_name ~= "" and file_name ~= process then
+			display_name = file_name -- Show filename if a file is open
+		else
+			display_name = get_last_segment(current_dir) -- Show directory if no file is open
+		end
+
+		-- Get the appropriate icon
+		local icon = process_icons.get_icon(process, file_extension)
+
+		local inner_title = string.format("%s %s", icon, display_name)
+
+		-- Calculate the available space for the inner title
+		local available_width = dynamic_max_width - 4 -- Subtract 4 for the bars and spaces
+
+		-- Truncate the inner title if necessary
+		if #inner_title > available_width then
+			inner_title = wezterm.truncate_right(inner_title, available_width - 3) .. "..."
+		end
+
+		-- Add the bars outside of the truncation
+		local title = string.format("%s %s %s", left_bar, inner_title, right_bar)
+
+		-- Ensure the entire title fits within the dynamic_max_width
+		if #title > dynamic_max_width then
+			title = wezterm.truncate_right(title, dynamic_max_width)
+		end
+
+		return {
+			{ Text = title },
+		}
+	end
+end)
+
+wezterm.on("window-resized", function(window, pane)
+	window:set_config_overrides({
+		tab_max_width = calculate_tab_width(window),
+	})
+end)
+
+wezterm.on("window-config-reloaded", function(window)
+	window:set_config_overrides({
+		tab_max_width = calculate_tab_width(window),
+	})
 end)
 
 return {
@@ -111,41 +102,46 @@ return {
 	integrated_title_button_alignment = "Left",
 	integrated_title_buttons = { "Close", "Hide", "Maximize" },
 	use_fancy_tab_bar = false,
-	-- window_background_opacity = 0.85,
-	-- macos_window_background_blur = 20,
+	tab_bar_at_bottom = true,
+	enable_scroll_bar = false,
+	window_background_opacity = 0.90,
+	macos_window_background_blur = 5,
 	window_decorations = "INTEGRATED_BUTTONS|RESIZE",
 	window_frame = {
 		font_size = 14,
 		inactive_titlebar_bg = "grey",
+		border_left_width = "0.5cell",
+		border_right_width = "0.5cell",
+		border_bottom_height = "0cell",
+		border_top_height = "0.25cell",
+		border_left_color = "#202431",
+		border_right_color = "#202431",
+		border_bottom_color = "black",
+		border_top_color = "#202431",
+	},
+	window_padding = {
+		left = "0cell",
+		right = "0cell",
+		top = "0cell",
+		bottom = "0cell",
 	},
 	inactive_pane_hsb = {
 		saturation = 0.5,
 		brightness = 0.5,
 	},
 	keys = {
-		-- bind wezterm copy mode to inspector hotkey
 		{
-			key = "i",
-			mods = "CMD|ALT",
-			action = wezterm.action.EmitEvent("vim-mode"),
-		},
-		-- go to alternate pane
-		{
-			key = "k",
+			key = ".",
 			mods = "CMD",
-			action = wezterm.action.EmitEvent("alternate-pane"),
-		},
-		-- show or hide alternate pane with cmd + h
-		{
-			key = "h",
-			mods = "CMD",
-			action = wezterm.action.EmitEvent("alternate-zoom"),
+			action = wezterm.action.SpawnCommandInNewWindow({
+				cwd = os.getenv("WEZTERM_CONFIG_DIR"),
+				args = { "/opt/homebrew/bin/nvim", os.getenv("WEZTERM_CONFIG_FILE") },
+			}),
 		},
 	},
 	font = wezterm.font_with_fallback({
-		"MapleMono Nerd Font",
-		-- Fallback to Nerd Font symbols if glyph is not available
-		"Symbols Nerd Font",
+		{ family = "MapleMono Nerd Font", weight = "Regular" },
+		{ family = "Symbols Nerd Font", weight = "Regular" },
 	}),
 	font_size = 14,
 
@@ -153,57 +149,56 @@ return {
 
 	color_scheme = "Tokyo Night",
 	colors = {
-		-- background = "#15171E",
+		background = "#121111",
 		tab_bar = {
-			background =  "black",
+			background = "#202431",
 			active_tab = {
-				bg_color = "#1C1E28",
+				bg_color = transparent,
 				fg_color = "#fefefe",
 				intensity = "Bold",
 			},
 			inactive_tab = {
-				bg_color = "black",
+				bg_color = "#202431",
 				fg_color = "#808080",
 				italic = true,
 			},
 			new_tab = {
-				bg_color = "black",
+				bg_color = "#202431",
 				fg_color = "#fefefe",
 			},
 			inactive_tab_edge = "grey",
-			active_tab_edge = "white",
 		},
 	},
 	tab_bar_style = {
-		window_close = wezterm.format {
-			{ Background = { Color = "#000" } },
-			{ Foreground = { Color = "#F30710"} },
-			{ Text =  "  ".. CIRCLE .. " " },
+		window_close = wezterm.format({
+			{ Background = { Color = "#202431" } },
+			{ Foreground = { Color = "#F30710" } },
+			{ Text = "  " .. CIRCLE .. " " },
+		}),
+		window_close_hover = wezterm.format({
+			{ Background = { Color = "#202431" } },
+			{ Foreground = { Color = "#F30710" } },
+			{ Text = "  " .. CIRCLE_FILLED .. " " },
+		}),
+		window_hide = wezterm.format({
+			{ Background = { Color = "#202431" } },
+			{ Foreground = { Color = "#FEC907" } },
+			{ Text = " " .. CIRCLE .. " " },
+		}),
+		window_hide_hover = wezterm.format({
+			{ Background = { Color = "#202431" } },
+			{ Foreground = { Color = "#FEC907" } },
+			{ Text = " " .. CIRCLE_FILLED .. " " },
+		}),
+		window_maximize = wezterm.format({
+			{ Background = { Color = "#202431" } },
+			{ Foreground = { Color = "#2FFF03" } },
+			{ Text = " " .. CIRCLE .. "  " },
+		}),
+		window_maximize_hover = wezterm.format({
+			{ Background = { Color = "#202431" } },
+			{ Foreground = { Color = "#2FFF03" } },
+			{ Text = " " .. CIRCLE_FILLED .. "  " },
+		}),
 	},
-		window_close_hover = wezterm.format {
-			{ Background = { Color = "#000" } },
-			{ Foreground = { Color = "#F30710"} },
-			{ Text =  "  ".. CIRCLE_FILLED .. " " },
-	},
-		window_hide = wezterm.format {
-			{ Background = { Color = "#000" } },
-			{ Foreground = { Color = "#FEC907"} },
-			{ Text =  " ".. CIRCLE .. " " },
-	},
-		window_hide_hover = wezterm.format {
-			{ Background = { Color = "#000" } },
-			{ Foreground = { Color = "#FEC907"} },
-			{ Text =  " ".. CIRCLE_FILLED .. " " },
-	},
-    		window_maximize = wezterm.format {
-			{ Background = { Color = "#000" } },
-			{ Foreground = { Color = "#2FFF03"} },
-			{ Text =  " ".. CIRCLE .. "  " },
-	},
-    		window_maximize_hover = wezterm.format {
-			{ Background = { Color = "#000" } },
-			{ Foreground = { Color = "#2FFF03"} },
-			{ Text =  " ".. CIRCLE_FILLED .. "  " },
-	},
-}
 }

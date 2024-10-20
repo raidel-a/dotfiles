@@ -10,25 +10,34 @@ M.override = {
 		italic = true,
 	},
 
-	-- NormalFloat = {},
-	Normal = { bg = "none" },
+	NormalFloat = { bg = "#111111"},
+	FloatBorder = { bg = "#eeeeee"},
+	Float = { bg = "#111111"},
+	-- Normal = { bg = "none" },
 	-- Folded = {},
 	-- NvimTreeNormal = { bg = "none" },
 	-- NvimTreeNormalNC = { bg = "none" },
-	-- -- NvimTreeCursorLine = { underline = true },
+	NvimTreeCursorLine = { underline = true },
+	NvimTreeOpenedFolderName = { bold = true, underline = true },
 	-- TelescopeNormal = {},
 	-- TelescopePrompt = {},
 	-- TelescopeResults = {},
 	-- TelescopePromptNormal = {},
 	-- TelescopePromptPrefix = {},
-	-- CursorLine = { bold = true },
+	CursorLine = { underline = true },
 	-- Pmenu = {},
 	-- CmpPmenu = {},
+	TbFill = {  bg = "#202431" },
+  TbBufOn = { bg = "none", bold = true},
+  TbBufonClose = { bg = "none", bold = true},
+  TbBufOff = { bg = "#202431"},
+  TbBufOffClose = { bg = "#202431", bold = true},
+  
 }
 
 ---@type HLTable
 M.add = {
-	NvimTreeOpenedFolderName = { bold = true, underline = true },
+	-- NvimTreeOpenedFolderName = { underline = true },
 }
 
 -- M.add_hlgroups = {

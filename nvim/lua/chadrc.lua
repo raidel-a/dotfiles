@@ -6,9 +6,9 @@ local highlights = require("highlights")
 -- local overrides = require("configs.overrides")
 
 M.base46 = {
-	theme = "poimandres",
-	theme_toggle = { "mountain", "poimandres" },
-	transparency = false,
+	theme = "tokyonight",
+	theme_toggle = { "tokyonight", "poimandres" },
+	transparency = true,
 
 	hl_override = highlights.override,
 	hl_add = highlights.add,
@@ -18,7 +18,7 @@ M.base46 = {
 
 M.ui = {
 	nvdash = {
-		load_on_startup = false,
+		load_on_startup = true,
 		header = {
 			"⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⣴⣦⣤⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
 			"⠀⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⠿⠿⠿⠿⣿⣿⣿⣿⣶⣤⡀⠀⠀⠀⠀⠀",
@@ -36,7 +36,7 @@ M.ui = {
 			"⠀⠀⠀⠀⠀⠈⠛⠿⣿⣿⣿⣿⣿⣶⣶⣿⣿⣿⣿⣿⠿⠋⠁⠀⠀⠀⠀⠀",
 			"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⠛⠛⠛⠛⠛⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀",
 		},
-		buttons = {
+		-- buttons = {
 		-- { "  Find File", ", f f", "Telescope find_files" },
 			-- { "󰈚  Recent Files", ", f o", "Telescope oldfiles" },
 			-- { "󰈭  Find Word", ", f w", "Telescope live_grep" },
@@ -44,7 +44,7 @@ M.ui = {
 			-- { "  Themes", ", t h", "Telescope themes" },
 			-- { "  Mappings", ", c h", "NvCheatsheet" },
 			-- { "󰩈  Quit", ";q", "quit" },
-		},
+		-- },
 	},
 
 	tabufline = {

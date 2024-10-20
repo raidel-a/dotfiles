@@ -91,8 +91,16 @@ map("n", "<leader>tt", function()
 	require("base46").toggle_theme()
 end, { desc = "Toggle Theme" })
 
+
+-- vim.keymap.nnoremap { '<Leader>gx', [[:execute '!open ' . shellescape(expand('<cfile>'), 1)<CR>]] }
+-- "https://x.com/xyz3va/status/1826747395696460076"
 -- Telekasten
 -- map("n", "<leader>z", "<cmd>Telekasten panel<CR>")
 
 -- sidebar-nvim
 -- map("n", "<Leader>sb", "<cmd>SidebarNvimToggle<CR>", { desc = "Toggle Sidebar" } )
+--
+
+-- map("i", "<CapsLock>", "<Esc>", { noremap = true, silent = true, desc = "Remap Caps Lock to Escape" })
+
+-- map("i", "<Esc>", "<CapsLock>", { noremap = true, silent = true, desc = "Remap Escape to Caps Lock" })
