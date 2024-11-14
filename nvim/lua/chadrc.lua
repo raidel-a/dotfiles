@@ -7,7 +7,7 @@ local highlights = require("highlights")
 
 M.base46 = {
 	theme = "tokyonight",
-	theme_toggle = { "tokyonight", "poimandres" },
+	theme_toggle = { "tokyonight", "tokyonight" },
 	transparency = true,
 
 	hl_override = highlights.override,
@@ -16,8 +16,7 @@ M.base46 = {
 
 -- M.plugins = "plugins"
 
-M.ui = {
-	nvdash = {
+	M.nvdash = {
 		load_on_startup = true,
 		header = {
 			"⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⣴⣦⣤⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
@@ -45,8 +44,9 @@ M.ui = {
 			-- { "  Mappings", ", c h", "NvCheatsheet" },
 			-- { "󰩈  Quit", ";q", "quit" },
 		-- },
-	},
+	}
 
+M.ui = {
 	tabufline = {
 		lazyload = false,
 		order = { "buffers", "tabs" },

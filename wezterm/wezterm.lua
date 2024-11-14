@@ -1,9 +1,16 @@
 local wezterm = require("wezterm")
+-- local config = require("wezterm")
+-- config.setup()
+local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
+
 local io = require("io")
 local os = require("os")
 local process_icons = require("process_icons")
 
 local transparent = "rgba(0,0,0,0.0)"
+local border = "#000000"
+-- local border = "#191B28"
+
 local CIRCLE = wezterm.nerdfonts.cod_circle_large
 local CIRCLE_FILLED = wezterm.nerdfonts.cod_circle_large_filled
 
@@ -41,7 +48,7 @@ wezterm.on("format-tab-title", function(tab, tabs_max_width)
 	local dynamic_max_width = window and calculate_tab_width(window) or 200
 
 	local active_pane = tab.active_pane
-	local current_dir = active_pane.current_working_dir.file_path
+	local current_dir = active_pane.current_working_dir and active_pane.current_working_dir.file_path
 
 	if current_dir then
 		local process = get_last_segment(active_pane.foreground_process_name):lower()
@@ -97,6 +104,85 @@ wezterm.on("window-config-reloaded", function(window)
 	})
 end)
 
+-- Add this before your key bindings
+local function handle_state_action(win, pane, id, action)
+	if action == "load" then
+		local type = string.match(id, "^([^/]+)")
+		local name = string.match(id, "([^/]+)%.json$")
+
+		local opts = {
+			relative = true,
+			restore_text = true,
+			on_pane_restore = resurrect.tab_state.default_on_pane_restore,
+		}
+
+		if type == "workspace" then
+			local state = resurrect.load_state(name, "workspace")
+			resurrect.workspace_state.restore_workspace(state, opts)
+		end
+	elseif action == "delete" then
+		win:perform_action(wezterm.action.PromptInputLine({
+			description = 'Type "yes" to confirm deletion',
+			action = wezterm.action_callback(function(window, pane, line)
+				if line == "yes" then
+					resurrect.delete_state(id)
+				end
+			end),
+		}))
+	elseif action == "rename" then
+		win:perform_action(wezterm.action.PromptInputLine({
+			description = "Enter new name",
+			action = wezterm.action_callback(function(window, pane, line)
+				if line then
+					local new_name = string.gsub(line, "[^%w%-_]", "_")
+					local new_path = string.gsub(id, "[^/]+%.json$", new_name .. ".json")
+					os.rename(id, new_path)
+				end
+			end),
+		}))
+	end
+end
+
+-- Move this function definition before the return statement
+local function setup_notifications()
+	local events = {
+		["resurrect.error"] = "Error",
+		["resurrect.save_state.finished"] = "Saved",
+		["resurrect.load_state.finished"] = "Loaded",
+		["resurrect.delete_state.finished"] = "Deleted",
+	}
+
+	local is_periodic_save = false
+	wezterm.on("resurrect.periodic_save", function()
+		is_periodic_save = true
+	end)
+
+	for event, action in pairs(events) do
+		wezterm.on(event, function(...)
+			if event == "resurrect.save_state.finished" and is_periodic_save then
+				is_periodic_save = false
+				return
+			end
+
+			local args = { ... }
+			local state_name = args[1] and string.match(args[1], "([^/]+)%.json$") or ""
+			local msg = string.format("%s workspace: %s", action, state_name)
+
+			wezterm.gui.gui_windows():toast_notification("Wezterm", msg, nil, 2000)
+		end)
+	end
+end
+
+-- Initialize resurrect features
+setup_notifications()
+resurrect.periodic_save({
+	interval_seconds = 300,
+	save_tabs = true,
+	save_windows = true,
+	save_workspaces = true,
+})
+resurrect.set_max_nlines(2000)
+
 return {
 	integrated_title_button_style = "Gnome",
 	integrated_title_button_alignment = "Left",
@@ -104,20 +190,21 @@ return {
 	use_fancy_tab_bar = false,
 	tab_bar_at_bottom = true,
 	enable_scroll_bar = false,
-	window_background_opacity = 0.90,
-	macos_window_background_blur = 5,
-	window_decorations = "INTEGRATED_BUTTONS|RESIZE",
+
+	window_background_opacity = 0.80,
+	macos_window_background_blur = 10,
+	window_decorations = "INTEGRATED_BUTTONS|RESIZE|MACOS_FORCE_ENABLE_SHADOW",
 	window_frame = {
-		font_size = 14,
-		inactive_titlebar_bg = "grey",
-		border_left_width = "0.5cell",
-		border_right_width = "0.5cell",
+		font_size = 12,
+		inactive_titlebar_bg = "black",
+		border_left_width = "1.00cell",
+		border_right_width = "1.00cell",
 		border_bottom_height = "0cell",
-		border_top_height = "0.25cell",
-		border_left_color = "#202431",
-		border_right_color = "#202431",
-		border_bottom_color = "black",
-		border_top_color = "#202431",
+		border_top_height = "0.5cell",
+		border_left_color = border,
+		border_right_color = border,
+		border_bottom_color = border,
+		border_top_color = border,
 	},
 	window_padding = {
 		left = "0cell",
@@ -130,40 +217,109 @@ return {
 		brightness = 0.5,
 	},
 	keys = {
+		-- Configuration keys
 		{
-			key = ".",
+			key = ",",
 			mods = "CMD",
-			action = wezterm.action.SpawnCommandInNewWindow({
+			action = wezterm.action.SpawnCommandInNewTab({
 				cwd = os.getenv("WEZTERM_CONFIG_DIR"),
 				args = { "/opt/homebrew/bin/nvim", os.getenv("WEZTERM_CONFIG_FILE") },
 			}),
 		},
+		{
+			key = "<",
+			mods = "CMD | SHIFT",
+			action = wezterm.action.SpawnCommandInNewTab({
+				cwd = "/Users/rai/.config/nvim",
+				args = { "/opt/homebrew/bin/nvim", "/Users/rai/.config/nvim/init.lua" },
+			}),
+		},
+
+		-- Resurrect keys
+		{
+			key = "s",
+			mods = "CMD | SHIFT",
+			action = wezterm.action_callback(function(win, pane)
+				resurrect.save_state(resurrect.workspace_state.get_workspace_state())
+			end),
+		},
+
+		-- Combined fuzzy finder for load/delete/rename
+		{
+			key = "f",
+			mods = "CMD | SHIFT",
+			action = wezterm.action_callback(function(win, pane)
+				local choices = {}
+				local states = resurrect.get_saved_states()
+
+				for _, state in ipairs(states) do
+					local name = string.match(state, "([^/]+)%.json$") or state
+					table.insert(choices, {
+						id = state,
+						label = string.format("󰆓 Load: %s", name),
+						action = "load",
+					})
+					table.insert(choices, {
+						id = state,
+						label = string.format("󰩺 Delete: %s", name),
+						action = "delete",
+					})
+					table.insert(choices, {
+						id = state,
+						label = string.format("󰑕 Rename: %s", name),
+						action = "rename",
+					})
+				end
+
+				win:perform_action(
+					wezterm.action.InputSelector({
+						title = " Workspace Manager",
+						choices = choices,
+						fuzzy = true,
+						description = "Enter = select  Esc = cancel  / = filter",
+						action = wezterm.action_callback(function(window, pane, id, label)
+							if not id then
+								return
+							end
+							for _, choice in ipairs(choices) do
+								if choice.label == label then
+									handle_state_action(window, pane, choice.id, choice.action)
+									break
+								end
+							end
+						end),
+					}),
+					pane
+				)
+			end),
+		},
 	},
+
 	font = wezterm.font_with_fallback({
 		{ family = "MapleMono Nerd Font", weight = "Regular" },
 		{ family = "Symbols Nerd Font", weight = "Regular" },
 	}),
-	font_size = 14,
+	font_size = 14.5,
 
 	-- color_scheme = (wezterm.gui.get_appearance():find("Dark") and "Ashes (dark) (terminal.sexy)" or "Ashes (light) (terminal.sexy)"),
 
-	color_scheme = "Tokyo Night",
+	-- color_scheme = "Tokyo Night",
 	colors = {
-		background = "#121111",
+		background = "#121112",
 		tab_bar = {
-			background = "#202431",
+			background = border,
 			active_tab = {
 				bg_color = transparent,
 				fg_color = "#fefefe",
 				intensity = "Bold",
 			},
 			inactive_tab = {
-				bg_color = "#202431",
+				bg_color = border,
 				fg_color = "#808080",
 				italic = true,
 			},
 			new_tab = {
-				bg_color = "#202431",
+				bg_color = border,
 				fg_color = "#fefefe",
 			},
 			inactive_tab_edge = "grey",
@@ -171,32 +327,32 @@ return {
 	},
 	tab_bar_style = {
 		window_close = wezterm.format({
-			{ Background = { Color = "#202431" } },
+			{ Background = { Color = border } },
 			{ Foreground = { Color = "#F30710" } },
 			{ Text = "  " .. CIRCLE .. " " },
 		}),
 		window_close_hover = wezterm.format({
-			{ Background = { Color = "#202431" } },
+			{ Background = { Color = border } },
 			{ Foreground = { Color = "#F30710" } },
 			{ Text = "  " .. CIRCLE_FILLED .. " " },
 		}),
 		window_hide = wezterm.format({
-			{ Background = { Color = "#202431" } },
+			{ Background = { Color = border } },
 			{ Foreground = { Color = "#FEC907" } },
 			{ Text = " " .. CIRCLE .. " " },
 		}),
 		window_hide_hover = wezterm.format({
-			{ Background = { Color = "#202431" } },
+			{ Background = { Color = border } },
 			{ Foreground = { Color = "#FEC907" } },
 			{ Text = " " .. CIRCLE_FILLED .. " " },
 		}),
 		window_maximize = wezterm.format({
-			{ Background = { Color = "#202431" } },
+			{ Background = { Color = border } },
 			{ Foreground = { Color = "#2FFF03" } },
 			{ Text = " " .. CIRCLE .. "  " },
 		}),
 		window_maximize_hover = wezterm.format({
-			{ Background = { Color = "#202431" } },
+			{ Background = { Color = border } },
 			{ Foreground = { Color = "#2FFF03" } },
 			{ Text = " " .. CIRCLE_FILLED .. "  " },
 		}),

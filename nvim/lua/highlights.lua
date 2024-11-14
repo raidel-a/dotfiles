@@ -3,16 +3,17 @@
 -- base30 variable names can also be used as colors
 
 local M = {}
-
+-- local primary = "#191B28"
+local primary = "#000000"
 ---@type Base46HLGroupsList
 M.override = {
 	Comment = {
 		italic = true,
 	},
 
-	NormalFloat = { bg = "#111111"},
-	FloatBorder = { bg = "#eeeeee"},
-	Float = { bg = "#111111"},
+	-- NormalFloat = { bg = "#111111"},
+	-- FloatBorder = { bg = "#eeeeee"},
+	-- Float = { bg = "#111111"},
 	-- Normal = { bg = "none" },
 	-- Folded = {},
 	-- NvimTreeNormal = { bg = "none" },
@@ -24,15 +25,17 @@ M.override = {
 	-- TelescopeResults = {},
 	-- TelescopePromptNormal = {},
 	-- TelescopePromptPrefix = {},
-	CursorLine = { underline = true },
+	-- CursorLine = { bold = true },
 	-- Pmenu = {},
 	-- CmpPmenu = {},
-	TbFill = {  bg = "#202431" },
-  TbBufOn = { bg = "none", bold = true},
-  TbBufonClose = { bg = "none", bold = true},
-  TbBufOff = { bg = "#202431"},
-  TbBufOffClose = { bg = "#202431", bold = true},
-  
+	TbFill = { bg = primary },
+	tbBufOn = { bg = "none", bold = true },
+	TbBufonClose = { bg = "none", bold = true },
+	TbBufOff = { bg = primary, italic = true },
+	TbBufOffClose = { bg = primary, bold = true },
+	TbBufOffModified = { bg = primary },
+	WinSeparator = { fg = "#aaaaaa" },
+	NvimTreeWinSeparator = { fg = "#777777" },
 }
 
 ---@type HLTable

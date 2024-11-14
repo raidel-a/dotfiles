@@ -9,6 +9,8 @@ return {
       loaded = "",
       not_loaded = "",
     },
+    border = "single",
+    pills = true
   },
 
   performance = {
