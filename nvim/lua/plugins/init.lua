@@ -21,7 +21,37 @@ return {
 	-- override plugin configs
 	{
 		"williamboman/mason.nvim",
+		cmd = "Mason",
+		event = "BufReadPre",
 		opts = overrides.mason,
+		config = function()
+			require("mason").setup({
+				ui = { border = "rounded" },
+				PATH = "prepend",
+				max_concurrent_installers = 10,
+			})
+		end,
+	},
+
+	{
+		"williamboman/mason-lspconfig.nvim",
+		lazy = false,
+		config = function()
+			local mason_lspconfig = require("mason-lspconfig")
+			
+			mason_lspconfig.setup({
+				ensure_installed = {
+					"lua_ls",    -- Lua
+					"cssls",     -- CSS
+					"html",      -- HTML
+					"ts_ls",  -- TypeScript/JavaScript
+					"clangd",    -- C/C++
+					"gopls",     -- Go
+					"rust_analyzer", -- Rust
+				},
+				automatic_installation = true,
+			})
+		end,
 	},
 
 	{
@@ -110,13 +140,13 @@ return {
 		"vimwiki/vimwiki",
 	},
 
-  {
-    "zbirenbaum/copilot.lua",
-    event = "InsertEnter",
-    config = function()
-      require("copilot").setup(require("configs.copilot"))
-    end,
-  },
+	{
+		"zbirenbaum/copilot.lua",
+		event = "InsertEnter",
+		config = function()
+			require("copilot").setup(require("configs.copilot"))
+		end,
+	},
 
 	{
 		"leoluz/nvim-dap-go",
@@ -125,6 +155,28 @@ return {
 		config = function(_, opts)
 			require("dap-go").setup(opts)
 		end,
+	},
+
+	{
+		"arnamak/stay-centered.nvim",
+		opts = function()
+			require("stay-centered").setup({
+				-- skip_filetypes = {"lua", "typescript"},
+			})
+		end,
+	},
+
+	-- tailwind-tools.lua
+	{
+		"luckasRanarison/tailwind-tools.nvim",
+		name = "tailwind-tools",
+		build = ":UpdateRemotePlugins",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-telescope/telescope.nvim", -- optional
+			"neovim/nvim-lspconfig", -- optional
+		},
+		opts = {}, -- your configuration
 	},
 
 	-- To make a plugin not be loaded

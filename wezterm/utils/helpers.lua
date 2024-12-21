@@ -1,7 +1,9 @@
+local wezterm = require 'wezterm'
 local helpers = {}
 
-helpers.left_bar = "\u{258F}" -- ▏
-helpers.right_bar = "\u{2595}" -- ▕
+helpers.left_bar  = "▏" -- ▏
+helpers.right_bar = "▕" -- ▕⢸
+helpers.divider = "🮔🮌"
 
 function helpers.get_last_segment(str)
   return string.match(str, "([^/\\]+)$") or str

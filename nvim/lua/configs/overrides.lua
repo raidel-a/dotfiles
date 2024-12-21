@@ -14,18 +14,18 @@ M.treesitter = {
 }
 
 M.mason = {
-	pkgs = {
+	ensure_installed = {
 		-- lua stuff
 		"lua-language-server",
 		"stylua",
 
-		-- web dev stuff
+		-- web dev
 		"css-lsp",
 		"html-lsp",
 		"typescript-language-server",
 		"deno",
 
-		-- C / C++
+		-- C/C++
 		"clangd",
 		"clang-format",
 		"cmake-language-server",
@@ -61,14 +61,14 @@ M.mason = {
 M.nvimtree = {
 	view = {
 		side = "right",
-  },
+	},
 
 	git = {
 		enable = true,
 	},
 
 	renderer = {
-    add_trailing = true,
+		add_trailing = true,
 		highlight_git = true,
 		icons = {
 			show = {

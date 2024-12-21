@@ -6,8 +6,8 @@ local highlights = require("highlights")
 -- local overrides = require("configs.overrides")
 
 M.base46 = {
-	theme = "tokyonight",
-	theme_toggle = { "tokyonight", "tokyonight" },
+	theme = "poimandres",
+	theme_toggle = { "poimandres", "poimandres" },
 	transparency = true,
 
 	hl_override = highlights.override,
@@ -49,7 +49,7 @@ M.base46 = {
 M.ui = {
 	tabufline = {
 		lazyload = false,
-		order = { "buffers", "tabs" },
+		order = { "tabs", "buffers" },
 		overriden_modules = nil,
 	},
 

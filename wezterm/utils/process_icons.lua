@@ -61,10 +61,10 @@ local process_icons = {
     ["erlang"] = dev_icon("erlang"),
 
     -- Shell and terminal
-    ["zsh"] = dev_icon("terminal"),
-    ["bash"] = dev_icon("terminal"),
-    ["fish"] = dev_icon("terminal"),
-    ["powershell"] = dev_icon("terminal"),
+    ["zsh"] = wezterm.nerdfonts.oct_rel_file_path,
+    ["bash"] = wezterm.nerdfonts.oct_rel_file_path,
+    ["fish"] = wezterm.nerdfonts.oct_rel_file_path,
+    ["powershell"] = wezterm.nerdfonts.oct_rel_file_path,
 
     -- Version control
     ["git"] = dev_icon("git"),

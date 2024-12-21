@@ -1,10 +1,12 @@
 local wezterm = require("wezterm")
 local helpers = require("utils.helpers")
 local process_icons = require("utils.process_icons")
+local ccolors = require("utils.ccolors")
 
 local CIRCLE = wezterm.nerdfonts.cod_circle_large
 local CIRCLE_FILLED = wezterm.nerdfonts.cod_circle_large_filled
-local border = "#000000"
+local nTAB_FILLED = wezterm.nerdfonts.md_plus_outline
+local nTAB = wezterm.nerdfonts.md_plus_thick
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
     local active_pane = tab.active_pane
@@ -21,11 +23,11 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_wid
             display_name = file_name
         else
             local dir_name = current_dir:match("([^/]+)/?$") or current_dir
-            display_name = "/" .. dir_name .. ""
+            display_name =  "" .. dir_name .. "/"
         end
 
         local icon = process_icons.get_icon(process, file_extension)
-        
+
         -- Account for the side bars and icon in the total width
         local side_bars_width = wezterm.column_width(helpers.left_bar) + wezterm.column_width(helpers.right_bar)
         local icon_width = wezterm.column_width(icon .. " ")
@@ -50,7 +52,7 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_wid
                 truncated = truncated .. char
                 current_width = current_width + char_width
             end
-            display_name = truncated .. ".."
+            display_name = truncated .. "‥"
         end
 
         local title = string.format("%s %s %s %s", helpers.left_bar, icon, display_name, helpers.right_bar)
@@ -65,12 +67,37 @@ return {
     tab_bar_at_bottom = true,
     enable_tab_bar = true,
     use_fancy_tab_bar = false,
-    tab_max_width = 20,
+    tab_max_width = 25,
     hide_tab_bar_if_only_one_tab = false,
+    show_new_tab_button_in_tab_bar = true,
     tab_bar_style = {
+
+        new_tab = wezterm.format({{
+            Background = {
+                Color = ccolors.border
+            }
+        }, {
+            Foreground = {
+                Color = "white"
+            }
+        }, {
+            Text = " " .. nTAB .. " "
+        }}),
+
+        new_tab_hover = wezterm.format({{
+            Background = {
+                Color = ccolors.border
+            }
+        }, {
+            Foreground = {
+                Color = "white"
+            }
+        }, {
+            Text = " " .. nTAB_FILLED .. " "
+        }}),
         window_close = wezterm.format({{
             Background = {
-                Color = border
+                Color = ccolors.border
             }
         }, {
             Foreground = {
@@ -81,7 +108,7 @@ return {
         }}),
         window_close_hover = wezterm.format({{
             Background = {
-                Color = border
+                Color = ccolors.border
             }
         }, {
             Foreground = {
@@ -92,7 +119,7 @@ return {
         }}),
         window_hide = wezterm.format({{
             Background = {
-                Color = border
+                Color = ccolors.border
             }
         }, {
             Foreground = {
@@ -103,7 +130,7 @@ return {
         }}),
         window_hide_hover = wezterm.format({{
             Background = {
-                Color = border
+                Color = ccolors.border
             }
         }, {
             Foreground = {
@@ -114,7 +141,7 @@ return {
         }}),
         window_maximize = wezterm.format({{
             Background = {
-                Color = border
+                Color = ccolors.border
             }
         }, {
             Foreground = {
@@ -125,7 +152,7 @@ return {
         }}),
         window_maximize_hover = wezterm.format({{
             Background = {
-                Color = border
+                Color = ccolors.border
             }
         }, {
             Foreground = {

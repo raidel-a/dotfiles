@@ -3,8 +3,7 @@
 -- base30 variable names can also be used as colors
 
 local M = {}
--- local primary = "#191B28"
-local primary = "#000000"
+local primary = "#222222"
 ---@type Base46HLGroupsList
 M.override = {
 	Comment = {
@@ -14,11 +13,11 @@ M.override = {
 	-- NormalFloat = { bg = "#111111"},
 	-- FloatBorder = { bg = "#eeeeee"},
 	-- Float = { bg = "#111111"},
-	-- Normal = { bg = "none" },
+	-- Normal = { bg = none },
 	-- Folded = {},
-	-- NvimTreeNormal = { bg = "none" },
-	-- NvimTreeNormalNC = { bg = "none" },
-	NvimTreeCursorLine = { underline = true },
+	-- NvimTreeNormal = { bg = none },
+	-- NvimTreeNormalNC = { bg = none },
+	NvimTreeCursorLine = { italic = true,  undercurl = true },
 	NvimTreeOpenedFolderName = { bold = true, underline = true },
 	-- TelescopeNormal = {},
 	-- TelescopePrompt = {},
@@ -28,14 +27,14 @@ M.override = {
 	-- CursorLine = { bold = true },
 	-- Pmenu = {},
 	-- CmpPmenu = {},
-	TbFill = { bg = primary },
-	tbBufOn = { bg = "none", bold = true },
-	TbBufonClose = { bg = "none", bold = true },
-	TbBufOff = { bg = primary, italic = true },
-	TbBufOffClose = { bg = primary, bold = true },
-	TbBufOffModified = { bg = primary },
-	WinSeparator = { fg = "#aaaaaa" },
-	NvimTreeWinSeparator = { fg = "#777777" },
+	TbFill = { bg = none, underline = true },
+	tbBufOn = { bg = none, bold = true},
+	-- TbBufonClose = { bg = none, bold = true },
+	TbBufOff = { bg = none, italic = true, underline = true },
+	TbBufOffClose = { bg = none, bold = true, underline = true },
+	TbBufOffModified = { bg = none, underline = true },
+	WinSeparator = { fg = "#888888" },
+	NvimTreeWinSeparator = { fg = "#666666" },
 }
 
 ---@type HLTable

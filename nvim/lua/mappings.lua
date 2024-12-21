@@ -4,7 +4,7 @@ local map = vim.keymap.set
 
 -- General
 -- map("n", ";", ":", { nowait = true, desc = "Command mode" })
-map("n", "<Leader><Leader>", ":nohlsearch<CR>", { desc = "Clear search highlighting" })
+-- map("n", "<Leader><Leader>", ":nohlsearch<CR>", { desc = "Clear search highlighting" })
 map("n", "C-f", ":Format<CR>", { desc = "Format file" })
 map("n", "<Leader>s", ":ClangdSwitchSourceHeader<CR>", { desc = "Switch between header and source file" })
 
@@ -104,3 +104,17 @@ end, { desc = "Toggle Theme" })
 -- map("i", "<CapsLock>", "<Esc>", { noremap = true, silent = true, desc = "Remap Caps Lock to Escape" })
 
 -- map("i", "<Esc>", "<CapsLock>", { noremap = true, silent = true, desc = "Remap Escape to Caps Lock" })
+
+
+map({ 'n', 'v' }, '<leader>st', require('stay-centered').toggle, { desc = 'Toggle stay-centered.nvim' })
+
+-- horizontal resize split with control + shift + h
+map("n", "<C-S-h>", "<C-w><", { desc = "Decrease horizontal split size" })
+
+map("n", "<C-S-l>", "<C-w>>", { desc = "Increase horizontal split size" })
+
+-- vertical resize split
+map("n", "<C-S-k>", "<C-w>+", { desc = "Increase vertical split size" })
+
+map("n", "<C-S-j>", "<C-w>-",  { desc = "Decrease vertical split size" })
+

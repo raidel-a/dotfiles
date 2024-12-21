@@ -3,7 +3,7 @@ require("globals")
 local options = {
 	-- guicursor = "", -- disable cursor styling
 	-- cursorline = false, -- disable cursor styling
-	wrap = false,
+	wrap = true,
 	cursorlineopt = "both", -- to enable cursorline!
 	completeopt = { "menuone", "noselect" }, -- options for insert mode completion (for cmp plugin)
 	conceallevel = 0, -- so that `` is visible in markdown files
@@ -21,7 +21,7 @@ local options = {
 	writebackup = false,
 
   title = true,
-  titlestring = "%t - nvim",  -- %t is the tail (filename) of the file
+  titlestring = "%t",  -- %t is the tail (filename) of the file
 
 }
 
