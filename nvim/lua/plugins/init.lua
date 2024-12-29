@@ -48,6 +48,7 @@ return {
 					"clangd",    -- C/C++
 					"gopls",     -- Go
 					"rust_analyzer", -- Rust
+          "tailwindcss",
 				},
 				automatic_installation = true,
 			})

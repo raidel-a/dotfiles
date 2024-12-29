@@ -7,6 +7,7 @@ return {
 	integrated_title_buttons = { "Close", "Hide", "Maximize" },
 	enable_scroll_bar = false,
 	window_background_opacity = 0.85,
+	-- window_background_opacity = 1.0,
 	macos_window_background_blur = 5,
 	window_decorations = " RESIZE",
 	-- |INTEGRATED_BUTTONS

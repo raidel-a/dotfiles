@@ -24,6 +24,7 @@ M.mason = {
 		"html-lsp",
 		"typescript-language-server",
 		"deno",
+    "tailwindcss",
 
 		-- C/C++
 		"clangd",
