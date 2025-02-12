@@ -4,6 +4,7 @@
 
 local M = {}
 local primary = "#222222"
+local vanta = "#000000"
 ---@type Base46HLGroupsList
 M.override = {
 	Comment = {
@@ -17,24 +18,30 @@ M.override = {
 	-- Folded = {},
 	-- NvimTreeNormal = { bg = none },
 	-- NvimTreeNormalNC = { bg = none },
-	NvimTreeCursorLine = { italic = true,  undercurl = true },
 	NvimTreeOpenedFolderName = { bold = true, underline = true },
 	-- TelescopeNormal = {},
 	-- TelescopePrompt = {},
 	-- TelescopeResults = {},
 	-- TelescopePromptNormal = {},
 	-- TelescopePromptPrefix = {},
-	-- CursorLine = { bold = true },
+	CursorLine = { underline = false },
 	-- Pmenu = {},
 	-- CmpPmenu = {},
-	TbFill = { bg = none, underline = true },
-	tbBufOn = { bg = none, bold = true},
+	TbFill = { bg = vanta, fg = "#888888", underdashed = true },
+	tbBufOn = { bg = "NONE", bold = true },
 	-- TbBufonClose = { bg = none, bold = true },
-	TbBufOff = { bg = none, italic = true, underline = true },
-	TbBufOffClose = { bg = none, bold = true, underline = true },
-	TbBufOffModified = { bg = none, underline = true },
+	TbBufOff = { bg = vanta, italic = true, underline = false },
+	TbBufOffClose = { bg = vanta, bold = true, underline = false },
+	TbBufOffModified = { bg = vanta, underline = false },
 	WinSeparator = { fg = "#888888" },
 	NvimTreeWinSeparator = { fg = "#666666" },
+	-- NvimTreeCursor = { blend = 0 },
+	-- NvimTreeCursorLine = {
+	-- 	bg = "#2d3149",
+	-- 	bold = true,
+	-- 	italic = true,
+	--    underdashed = true
+	-- },
 }
 
 ---@type HLTable

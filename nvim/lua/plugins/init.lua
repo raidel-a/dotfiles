@@ -38,17 +38,17 @@ return {
 		lazy = false,
 		config = function()
 			local mason_lspconfig = require("mason-lspconfig")
-			
+
 			mason_lspconfig.setup({
 				ensure_installed = {
-					"lua_ls",    -- Lua
-					"cssls",     -- CSS
-					"html",      -- HTML
-					"ts_ls",  -- TypeScript/JavaScript
-					"clangd",    -- C/C++
-					"gopls",     -- Go
+					"lua_ls", -- Lua
+					"cssls", -- CSS
+					"html", -- HTML
+					"ts_ls", -- TypeScript/JavaScript
+					"clangd", -- C/C++
+					"gopls", -- Go
 					"rust_analyzer", -- Rust
-          "tailwindcss",
+					"tailwindcss",
 				},
 				automatic_installation = true,
 			})
@@ -127,6 +127,8 @@ return {
 		requires = { "mfussenegger/nvim-dap" },
 	},
 
+	{ "nvim-neotest/nvim-nio" },
+
 	-- better bdelete, close buffers without closing windows
 	{
 		"ojroques/nvim-bufdel",
@@ -141,13 +143,13 @@ return {
 		"vimwiki/vimwiki",
 	},
 
-	{
-		"zbirenbaum/copilot.lua",
-		event = "InsertEnter",
-		config = function()
-			require("copilot").setup(require("configs.copilot"))
-		end,
-	},
+	-- {
+	-- 	"zbirenbaum/copilot.lua",
+	-- 	event = "InsertEnter",
+	-- 	config = function()
+	-- 		require("copilot").setup(require("configs.copilot"))
+	-- 	end,
+	-- },
 
 	{
 		"leoluz/nvim-dap-go",
@@ -178,6 +180,64 @@ return {
 			"neovim/nvim-lspconfig", -- optional
 		},
 		opts = {}, -- your configuration
+	},
+
+	-- {
+	-- 		"3rd/image.nvim",
+	-- },
+
+	{
+		"skardyy/neo-img",
+		lazy = false,
+		config = function()
+			require("neo-img").setup({
+				supported_extensions = {
+					["png"] = true,
+					["jpg"] = true,
+					["jpeg"] = true,
+					["gif"] = true,
+					["webp"] = true,
+					["heic"] = true
+				},
+				auto_open = true, -- Automatically open images when buffer is loaded
+				oil_preview = true, -- changes oil preview of images too
+				backend = "kitty", -- kitty / iterm / sixel / auto (auto detects what is supported in your terminal)
+				size = { --scales the width, will maintain aspect ratio
+					oil = 400,
+					main = 800,
+				},
+				offset = { -- only x offset
+					oil = 5,
+					main = 10,
+				},
+			})
+		end,
+	},
+
+	{
+		"f-person/auto-dark-mode.nvim",
+		config = function()
+			local auto_dark_mode = require("auto-dark-mode")
+
+			auto_dark_mode.setup({
+				update_interval = 1000,
+				set_dark_mode = function()
+					-- Set the theme name
+					vim.g.nvchad_theme = "poimandres" -- your dark theme
+					-- Load base46 highlights
+					require("base46").load_all_highlights()
+					-- Trigger theme reload event
+					vim.api.nvim_exec_autocmds("User", { pattern = "NvThemeReload" })
+				end,
+				set_light_mode = function()
+					vim.g.nvchad_theme = "flexoki-light" -- your light theme
+					require("base46").load_all_highlights()
+					vim.api.nvim_exec_autocmds("User", { pattern = "NvThemeReload" })
+				end,
+			})
+
+			auto_dark_mode.init()
+		end,
 	},
 
 	-- To make a plugin not be loaded

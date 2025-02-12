@@ -1,0 +1,20 @@
+## /zim/.zimrc
+
+zmodule zsh-users/zsh-syntax-highlighting
+
+# add completions for commands
+zmodule zsh-users/zsh-completions --fpath src
+zmodule completion
+zmodule Aloxaf/fzf-tab 
+zmodule zsh-users/zsh-autosuggestions
+zmodule exa
+
+# override yank and paste to use system clipboard for zsh_vim_mode
+# Use ${ZIM_HOME} instead of ${ZSHCONFIG}/zim
+zmodule ${ZIM_HOME} --source zsh_vim_mode.zsh
+zmodule jeffreytse/zsh-vi-mode
+
+zmodule fzf
+zmodule ${ZIM_HOME} --source fzf.zsh
+
+zmodule starship/starship

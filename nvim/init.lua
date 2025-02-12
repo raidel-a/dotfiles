@@ -38,6 +38,9 @@ dofile(vim.g.base46_cache .. "statusline")
 -- require "autocmds"
 require('autocmds').setup()
 
+
+vim.diagnostic.config(config)
+
 vim.schedule(function()
   require "mappings"
 end)

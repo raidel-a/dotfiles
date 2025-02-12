@@ -30,6 +30,8 @@ local keys = {
 		action = act.SpawnWindow,
 	},
 
+	{ key = "m", mods = "CMD", action = act.Hide },
+
 	{
 		key = "H",
 		mods = "CMD|SHIFT",
@@ -146,7 +148,7 @@ local keys = {
 		action = act.ToggleFullScreen,
 	},
 
-	--
+	-- Command palette
 	{
 		key = "p",
 		mods = "CMD|SHIFT",
@@ -170,88 +172,6 @@ local keys = {
 		}),
 	},
 
-	{
-		key = "p",
-		mods = "CTRL | SHIFT",
-		action = wezterm.action_callback(function(window, pane)
-			local choices = {}
-			for _, dir in ipairs(get_project_dirs()) do
-				table.insert(choices, { label = dir })
-			end
-
-			window:perform_action(wezterm.action.InputSelector({
-				title = "Projects",
-				choices = choices,
-				action = wezterm.action_callback(function(_, _, dir)
-					if dir then
-						window:perform_action(wezterm.action.SpawnCommandInNewTab({
-							cwd = dir,
-							args = { "bash" },
-						}))
-					end
-				end),
-			}))
-		end),
-	},
-
-	-- Resurrect keys
-	{
-		key = "s",
-		mods = "CMD | SHIFT",
-		action = wezterm.action_callback(function(win, pane)
-			resurrect.save_state(resurrect.workspace_state.get_workspace_state())
-		end),
-	},
-
-	-- Combined fuzzy finder for load/delete/rename
-	{
-		key = "f",
-		mods = "CMD | SHIFT",
-		action = wezterm.action_callback(function(win, pane)
-			local choices = {}
-			local states = resurrect.get_saved_states()
-
-			for _, state in ipairs(states) do
-				local name = string.match(state, "([^/]+)%.json$") or state
-				table.insert(choices, {
-					id = state,
-					label = string.format("󰆓 Load: %s", name),
-					action = "load",
-				})
-				table.insert(choices, {
-					id = state,
-					label = string.format("󰩺 Delete: %s", name),
-					action = "delete",
-				})
-				table.insert(choices, {
-					id = state,
-					label = string.format("󰑕 Rename: %s", name),
-					action = "rename",
-				})
-			end
-
-			win:perform_action(
-				wezterm.action.InputSelector({
-					title = " Workspace Manager",
-					choices = choices,
-					fuzzy = true,
-					description = "Enter = select  Esc = cancel  / = filter",
-					action = wezterm.action_callback(function(window, pane, id, label)
-						if not id then
-							return
-						end
-						for _, choice in ipairs(choices) do
-							if choice.label == label then
-								handle_state_action(window, pane, choice.id, choice.action)
-								break
-							end
-						end
-					end),
-				}),
-				pane
-			)
-		end),
-	},
 }
 
 -- Return the config

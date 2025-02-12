@@ -91,7 +91,6 @@ map("n", "<leader>tt", function()
 	require("base46").toggle_theme()
 end, { desc = "Toggle Theme" })
 
-
 -- vim.keymap.nnoremap { '<Leader>gx', [[:execute '!open ' . shellescape(expand('<cfile>'), 1)<CR>]] }
 -- "https://x.com/xyz3va/status/1826747395696460076"
 -- Telekasten
@@ -105,8 +104,7 @@ end, { desc = "Toggle Theme" })
 
 -- map("i", "<Esc>", "<CapsLock>", { noremap = true, silent = true, desc = "Remap Escape to Caps Lock" })
 
-
-map({ 'n', 'v' }, '<leader>st', require('stay-centered').toggle, { desc = 'Toggle stay-centered.nvim' })
+map({ "n", "v" }, "<leader>st", require("stay-centered").toggle, { desc = "Toggle stay-centered.nvim" })
 
 -- horizontal resize split with control + shift + h
 map("n", "<C-S-h>", "<C-w><", { desc = "Decrease horizontal split size" })
@@ -116,5 +114,4 @@ map("n", "<C-S-l>", "<C-w>>", { desc = "Increase horizontal split size" })
 -- vertical resize split
 map("n", "<C-S-k>", "<C-w>+", { desc = "Increase vertical split size" })
 
-map("n", "<C-S-j>", "<C-w>-",  { desc = "Decrease vertical split size" })
-
+map("n", "<C-S-j>", "<C-w>-", { desc = "Decrease vertical split size" })

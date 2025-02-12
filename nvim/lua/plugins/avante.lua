@@ -5,8 +5,17 @@ return {
 	version = false, -- set this if you want to always pull the latest change
 	opts = {
 		---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
-		provider = "copilot",
-		auto_suggestions_provider = "copilot",
+		-- provider = "copilot",
+		provider = "ollama",
+		vendors = {
+			ollama = {
+				__inherited_from = "openai",
+				api_key_name = "",
+				endpoint = "http://127.0.0.1:11434/v1",
+				model = "deepseek-r1:7b",
+			},
+		},
+		auto_suggestions_provider = "ollama",
 		behaviour = {
 			auto_sugestions = false,
 			auto_set_highlight_group = true,
