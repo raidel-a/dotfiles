@@ -1,12 +1,12 @@
 local wezterm = require("wezterm")
 local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
 
-resurrect.set_encryption({
-  enable = true,
-  method = "age", -- "age" is the default encryption method, but you can also specify "rage" or "gpg"
-  private_key = "../key.txt", -- if using "gpg", you can omit this
-  public_key = "age1w5gmrt0wrseuj72t9clajua3udaj8gzhcw0sut4vvqmfdl0yrq2s644qqw",
-})
+-- resurrect.set_encryption({
+--   enable = true,
+--   method = "age", -- "age" is the default encryption method, but you can also specify "rage" or "gpg"
+--   private_key = "../key.txt", -- if using "gpg", you can omit this
+--   public_key = "age1w5gmrt0wrseuj72t9clajua3udaj8gzhcw0sut4vvqmfdl0yrq2s644qqw",
+-- })
 
 local resurrect_keys = {
 
@@ -94,13 +94,14 @@ local resurrect_keys = {
         action = wezterm.action_callback(function(win, pane)
             win:perform_action(
                 wezterm.action.InputSelector {
-                    title = "Resurrect",
+                    title = "Resurrect Menu",
                     choices = {
                         { label = "Save", id = "menu_save" },
                         { label = "Load", id = "menu_load" },
+                        { label = "Rename", id = "menu_rename" },
                         { label = "Delete", id = "menu_delete" },
                     },
-                    description = "Resurrect Menu:\r\n↑/↓    - Move selection\r\nEnter  - Open selected menu\r\nEsc    - Close menu\r\n",
+                    description = "Main Menu Navigation:\r\n↑/↓    - Move selection\r\nEnter  - Open selected menu\r\nEsc    - Close menu\r\nType   - Filter options",
                     action = wezterm.action_callback(function(window, pane, id, label)
                         if id == "menu_save" then
                             window:perform_action(
@@ -112,18 +113,39 @@ local resurrect_keys = {
                                         { label = "Save Tab", id = "save_tab" },
                                         { label = "Save Workspace & Window", id = "save_workspace_window" },
                                     },
-                                    description = "Select what to save\r\n\r\nNavigation:\r\n↑/↓    - Move selection\r\nEnter  - Confirm selection\r\nEsc    - Go back/cancel\r\n",
+                                    description = "Select what to save\r\n\r\nNavigation:\r\n↑/↓    - Move selection\r\nEnter  - Confirm selection\r\nEsc    - Go back/cancel\r\nType   - Filter options",
                                     action = wezterm.action_callback(function(win2, pane2, sub_id)
-                                        if sub_id == "save_workspace" then
-                                            resurrect.save_state(resurrect.workspace_state.get_workspace_state())
-                                        elseif sub_id == "save_window" then
-                                            resurrect.window_state.save_window_action()(win2, pane2)
-                                        elseif sub_id == "save_tab" then
-                                            resurrect.tab_state.save_tab_action()(win2, pane2)
-                                        elseif sub_id == "save_workspace_window" then
-                                            resurrect.save_state(resurrect.workspace_state.get_workspace_state())
-                                            resurrect.window_state.save_window_action()(win2, pane2)
-                                        end
+                                        -- After selecting what to save, prompt for name
+                                        window:perform_action(
+                                            wezterm.action.PromptInputLine {
+                                                description = "Enter name for save (leave empty for timestamp):",
+                                                action = wezterm.action_callback(function(win3, pane3, name)
+                                                    if sub_id == "save_workspace" then
+                                                        resurrect.save_state(resurrect.workspace_state.get_workspace_state(), name, "workspace")
+                                                    elseif sub_id == "save_window" then
+                                                        if name and name ~= "" then
+                                                            resurrect.save_state(resurrect.window_state.get_window_state(win3), name, "window")
+                                                        else
+                                                            resurrect.window_state.save_window_action()(win3, pane3)
+                                                        end
+                                                    elseif sub_id == "save_tab" then
+                                                        if name and name ~= "" then
+                                                            resurrect.save_state(resurrect.tab_state.get_tab_state(pane3:tab()), name, "tab")
+                                                        else
+                                                            resurrect.tab_state.save_tab_action()(win3, pane3)
+                                                        end
+                                                    elseif sub_id == "save_workspace_window" then
+                                                        resurrect.save_state(resurrect.workspace_state.get_workspace_state(), name, "workspace")
+                                                        if name and name ~= "" then
+                                                            resurrect.save_state(resurrect.window_state.get_window_state(win3), name, "window")
+                                                        else
+                                                            resurrect.window_state.save_window_action()(win3, pane3)
+                                                        end
+                                                    end
+                                                end),
+                                            },
+                                            pane2
+                                        )
                                     end),
                                 },
                                 pane
@@ -163,6 +185,31 @@ local resurrect_keys = {
                                 title = "Delete Saved State",
                                 description = "Select a state to delete\r\n\r\nNavigation:\r\n↑/↓    - Move selection\r\nEnter  - Delete selected state\r\nEsc    - Go back/cancel\r\n",
                                 fuzzy_description = "Search state to delete: ",
+                                is_fuzzy = true,
+                            })
+                        elseif id == "menu_rename" then
+                            resurrect.fuzzy_load(window, pane, function(rename_id)
+                                window:perform_action(
+                                    wezterm.action.PromptInputLine {
+                                        description = "Enter new name for the state",
+                                        action = wezterm.action_callback(function(win2, pane2, new_name)
+                                            if new_name and new_name ~= "" then
+                                                local type = string.match(rename_id, "^([^/]+)")
+                                                local old_name = string.match(rename_id, "([^/]+)$")
+                                                old_name = string.match(old_name, "(.+)%..+$")
+                                                
+                                                local state = resurrect.load_state(old_name, type)
+                                                resurrect.delete_state(rename_id)
+                                                resurrect.save_state(state, new_name, type)
+                                            end
+                                        end),
+                                    },
+                                    pane
+                                )
+                            end, {
+                                title = "Rename Saved State",
+                                description = "Select a state to rename\r\n\r\nNavigation:\r\n↑/↓    - Move selection\r\nEnter  - Select state to rename\r\nEsc    - Go back/cancel\r\nType   - Filter states",
+                                fuzzy_description = "Search state to rename: ",
                                 is_fuzzy = true,
                             })
                         end

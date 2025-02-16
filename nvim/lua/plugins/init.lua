@@ -199,6 +199,7 @@ return {
 					["webp"] = true,
 					["heic"] = true
 				},
+        build = "cd ttyimg && go build",
 				auto_open = true, -- Automatically open images when buffer is loaded
 				oil_preview = true, -- changes oil preview of images too
 				backend = "kitty", -- kitty / iterm / sixel / auto (auto detects what is supported in your terminal)

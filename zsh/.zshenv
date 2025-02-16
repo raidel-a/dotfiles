@@ -32,3 +32,5 @@ export GOROOT="$(brew --prefix go)/libexec"
 export GOPATH="$HOME/.go"
 
 export PATH="$DOTFILESPATH/bin:$GOROOT/bin:$GOPATH/bin:$PATH"
+
+export PATH="$PATH:/Users/rai/Library/Python/3.12/bin"
