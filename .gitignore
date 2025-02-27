@@ -2,3 +2,6 @@
 .env
 key.txt
 .DS_Store
+
+/.zsh_sessions
+.zsh_history
