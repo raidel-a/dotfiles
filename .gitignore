@@ -5,6 +5,8 @@ key.txt
 
 /.zsh_sessions
 .zsh_history
+.zcompdump
+
 wezterm/wezterm-type
 
 *
