@@ -1,6 +1,7 @@
 ## /zsh/.zshenv
 
-# zshrc is also sourced when the shell is started programatically
+# Initialize Homebrew first
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # XDG Base Directory specification
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -17,17 +18,10 @@ export SAVEHIST=10000
 export EDITOR=nvim
 export VISUAL=nvim
 
-# Path configuration
+# Base path configuration
 export DOTFILESPATH="$HOME/.config"
-export GOROOT="$(brew --prefix go)/libexec"
-export GOPATH="$HOME/.go"
-
-# Path additions
-export PATH="$DOTFILESPATH/bin:$GOROOT/bin:$GOPATH/bin:$PATH"
+export PATH="$DOTFILESPATH/bin:$PATH"
 export PATH="$PATH:/Users/rai/Library/Python/3.12/bin"
-
-# Homebrew initialization
-eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Custom directories
 export SCREENSHOT="$HOME/Pictures/Screenshots"
