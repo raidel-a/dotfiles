@@ -38,7 +38,7 @@ return {
 	integrated_title_button_alignment = "Left",
 	integrated_title_buttons = { "Close", "Hide", "Maximize" },
 	enable_scroll_bar = false,
-	window_background_opacity = 0.93,
+	window_background_opacity = 0.90,
 	macos_window_background_blur = 0,
 	window_decorations = " RESIZE |INTEGRATED_BUTTONS",
 	-- |INTEGRATED_BUTTONS

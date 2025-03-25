@@ -7,7 +7,7 @@ local header = require("header")
 -- local overrides = require("configs.overrides")
 
 M.base46 = {
-	theme = "flexoki-light",
+	theme = "poimandres",
 	theme_toggle = { "poimandres", "flexoki-light" },
 	transparency = true,
 
