@@ -46,7 +46,33 @@ M.override = {
 
 ---@type HLTable
 M.add = {
-	-- NvimTreeOpenedFolderName = { underline = true },
+	-- Base highlights
+	GitSignsAdd = { link = "DiffAdd" },
+	GitSignsChange = { link = "DiffChange" },
+	GitSignsDelete = { link = "DiffDelete" },
+	
+	-- Line highlights
+	GitSignsAddLn = { link = "DiffAdd" },
+	GitSignsChangeLn = { link = "DiffChange" },
+	GitSignsDeleteLn = { link = "DiffDelete" },
+	
+	-- Number highlights
+	GitSignsAddNr = { link = "DiffAdd" },
+	GitSignsChangeNr = { link = "DiffChange" },
+	GitSignsDeleteNr = { link = "DiffDelete" },
+	
+	-- Composite types
+	GitSignsChangedelete = { link = "GitSignsChange" },
+	GitSignsChangedeleteLn = { link = "GitSignsChangeLn" },
+	GitSignsChangedeleteNr = { link = "GitSignsChangeNr" },
+	GitSignsTopdelete = { link = "GitSignsDelete" },
+	GitSignsTopdeleteLn = { link = "GitSignsDeleteLn" },
+	GitSignsTopdeleteNr = { link = "GitSignsDeleteNr" },
+	
+	-- Untracked files
+	GitSignsUntracked = { link = "GitSignsAdd" },
+	GitSignsUntrackedNr = { link = "GitSignsAddNr" },
+	GitSignsUntrackedLn = { link = "GitSignsAddLn" },
 }
 
 -- M.add_hlgroups = {

@@ -81,12 +81,26 @@ M.nvimtree = {
 
 M.gitsigns = {
 	signs = {
-		add = { hl = "GitSignsAdd", text = "+", numhl = "GitSignsAddNr" },
-		change = { hl = "DiffAdd", text = "▎", numhl = "GitSignsChangeNr" },
-		delete = { hl = "DiffDelete", text = "-", numhl = "GitSignsDeleteNr" },
-		topdelete = { hl = "DiffDelete", text = "- ", numhl = "GitSignsDeleteNr" },
-		changedelete = { hl = "DiffChangeDelete", text = "~", numhl = "GitSignsChangeNr" },
+		add = { text = "│" },
+		change = { text = "│" },
+		delete = { text = "_" },
+		topdelete = { text = "‾" },
+		changedelete = { text = "~" },
+		untracked = { text = "┆" },
 	},
+	signcolumn = true,
+	numhl = true,
+	linehl = false,
+	word_diff = false,
+	watch_gitdir = {
+		interval = 1000,
+		follow_files = true,
+	},
+	attach_to_untracked = true,
+	current_line_blame = false,
+	sign_priority = 6,
+	update_debounce = 100,
+	status_formatter = nil,
 }
 
 M.cmp = {

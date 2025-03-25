@@ -85,7 +85,8 @@ return {
 
 	{
 		"lewis6991/gitsigns.nvim",
-		-- opts = overrides.gitsigns,
+    lazy = false,
+		opts = overrides.gitsigns,
 	},
 
 	{
