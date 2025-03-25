@@ -115,3 +115,6 @@ map("n", "<C-S-l>", "<C-w>>", { desc = "Increase horizontal split size" })
 map("n", "<C-S-k>", "<C-w>+", { desc = "Increase vertical split size" })
 
 map("n", "<C-S-j>", "<C-w>-", { desc = "Decrease vertical split size" })
+
+
+map("n", "<leader>fi", "<cmd>lua require('telescope.builtin').live_grep({ additional_args = {'--no-ignore'} })<CR>", { desc = "Find text (include gitignored)" })
