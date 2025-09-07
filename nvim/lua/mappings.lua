@@ -5,7 +5,18 @@ local map = vim.keymap.set
 -- General
 -- map("n", ";", ":", { nowait = true, desc = "Command mode" })
 -- map("n", "<Leader><Leader>", ":nohlsearch<CR>", { desc = "Clear search highlighting" })
-map("n", "C-f", ":Format<CR>", { desc = "Format file" })
+-- map("n", "C-f", ":Format<CR>", { desc = "Format file" })
+
+-- Conform formatting
+map(
+    "n",
+    "<C-f>",
+    function()
+        require("conform").format({ async = true, lsp_fallback = true })
+    end,
+    { desc = "Format file" }
+)
+
 map("n", "<Leader>s", ":ClangdSwitchSourceHeader<CR>", { desc = "Switch between header and source file" })
 
 -- Telescope
@@ -60,10 +71,10 @@ map("n", "<Leader>da", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "Lsp c
 
 -- Null-ls
 map(
-	"n",
-	"<C-f>",
-	"<cmd>lua require('configs.lsp.null-ls').lsp_formatting(vim.api.nvim_get_current_buf())<CR>",
-	{ desc = "Format current file using null-ls" }
+    "n",
+    "<C-f>",
+    "<cmd>lua require('configs.lsp.null-ls').lsp_formatting(vim.api.nvim_get_current_buf())<CR>",
+    { desc = "Format current file using null-ls" }
 )
 
 -- Buffer delete

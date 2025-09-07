@@ -89,6 +89,7 @@ $time\
 \n$character"""
 
 right_format = ""
+command_timeout = 3600
 
 [fill]
 symbol = " "
@@ -111,7 +112,8 @@ style = 'green italic'
 format = "[$symbol]($style)"
 style = "bold italic bright-purple"
 symbol = "⋈┈"
-disabled = false
+disabled = true
+command_timeout = 5000
 
 [username]
 style_user = "bright-yellow bold italic"

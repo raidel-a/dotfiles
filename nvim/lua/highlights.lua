@@ -19,16 +19,11 @@ M.override = {
 	-- NvimTreeNormal = { bg = none },
 	-- NvimTreeNormalNC = { bg = none },
 	NvimTreeOpenedFolderName = { bold = true, underline = true },
-	-- TelescopeNormal = {},
-	-- TelescopePrompt = {},
-	-- TelescopeResults = {},
-	-- TelescopePromptNormal = {},
-	-- TelescopePromptPrefix = {},
 	CursorLine = { underline = false },
 	-- Pmenu = {},
 	-- CmpPmenu = {},
-	TbFill = { bg = vanta, fg = "#888888", underdashed = true },
-	tbBufOn = { bg = "NONE", bold = true },
+	TbFill = { bg = vanta, fg = "#888888", underline = true },
+	tbBufOn = { bg = none, bold = true },
 	-- TbBufonClose = { bg = none, bold = true },
 	TbBufOff = { bg = vanta, italic = true, underline = false },
 	TbBufOffClose = { bg = vanta, bold = true, underline = false },
@@ -50,17 +45,17 @@ M.add = {
 	GitSignsAdd = { link = "DiffAdd" },
 	GitSignsChange = { link = "DiffChange" },
 	GitSignsDelete = { link = "DiffDelete" },
-	
+
 	-- Line highlights
 	GitSignsAddLn = { link = "DiffAdd" },
 	GitSignsChangeLn = { link = "DiffChange" },
 	GitSignsDeleteLn = { link = "DiffDelete" },
-	
+
 	-- Number highlights
 	GitSignsAddNr = { link = "DiffAdd" },
 	GitSignsChangeNr = { link = "DiffChange" },
 	GitSignsDeleteNr = { link = "DiffDelete" },
-	
+
 	-- Composite types
 	GitSignsChangedelete = { link = "GitSignsChange" },
 	GitSignsChangedeleteLn = { link = "GitSignsChangeLn" },
@@ -68,7 +63,7 @@ M.add = {
 	GitSignsTopdelete = { link = "GitSignsDelete" },
 	GitSignsTopdeleteLn = { link = "GitSignsDeleteLn" },
 	GitSignsTopdeleteNr = { link = "GitSignsDeleteNr" },
-	
+
 	-- Untracked files
 	GitSignsUntracked = { link = "GitSignsAdd" },
 	GitSignsUntrackedNr = { link = "GitSignsAddNr" },

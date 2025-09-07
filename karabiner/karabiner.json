@@ -1,10 +1,12 @@
 {
+    "global": { "unsafe_ui": true },
     "profiles": [
         {
             "complex_modifications": {
                 "rules": [
                     {
                         "description": "Map Custom Fn Key",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": { "consumer_key_code": 47 },
@@ -89,6 +91,7 @@
                         "product_id": 73,
                         "vendor_id": 9610
                     },
+                    "ignore_vendor_events": true,
                     "simple_modifications": [
                         {
                             "from": { "key_code": "caps_lock" },
@@ -99,14 +102,22 @@
                             "to": [{ "key_code": "caps_lock" }]
                         },
                         {
-                            "from": { "key_code": "right_control" },
-                            "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
-                        },
-                        {
                             "from": { "key_code": "left_option" },
                             "to": [{ "key_code": "left_command" }]
+                        },
+                        {
+                            "from": { "key_code": "right_control" },
+                            "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
                         }
                     ]
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 64007,
+                        "vendor_id": 9639
+                    },
+                    "ignore_vendor_events": true
                 }
             ],
             "fn_function_keys": [

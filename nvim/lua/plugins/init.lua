@@ -1,21 +1,56 @@
 local overrides = require("configs.overrides")
 
 return {
+	-- {
+	-- 	"neovim/nvim-lspconfig",
+	-- 	dependencies = {
+	-- 		-- format & linting
+	-- 		{
+	-- 			"jose-elias-alvarez/null-ls.nvim",
+	-- 			config = function()
+	-- 				require("configs.lsp.null-ls")
+	-- 			end,
+	-- 		},
+	-- 	},
+	-- 	config = function()
+	-- 		require("nvchad.configs.lspconfig").defaults() -- nvchad defaults for lua
+	-- 		require("configs.lsp")
+	-- 	end, -- Override to setup mason-lspconfig
+	-- },
+
 	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
-			-- format & linting
 			{
-				"jose-elias-alvarez/null-ls.nvim",
+				"stevearc/conform.nvim",
 				config = function()
-					require("configs.lsp.null-ls")
+					require("conform").setup({
+						formatters_by_ft = {
+							lua = { "stylua" },
+							python = { "black" },
+							javascript = { "prettier" },
+							typescript = { "prettier" },
+							css = { "prettier" },
+							html = { "prettier" },
+							json = { "prettier" },
+							markdown = { "prettier" },
+							rust = { "rustfmt" },
+							go = { "gofmt" },
+							cpp = { "clang_format" },
+							c = { "clang_format" },
+						},
+						format_on_save = {
+							timeout_ms = 500,
+							lsp_fallback = true,
+						},
+					})
 				end,
 			},
 		},
 		config = function()
 			require("nvchad.configs.lspconfig").defaults() -- nvchad defaults for lua
 			require("configs.lsp")
-		end, -- Override to setup mason-lspconfig
+		end,
 	},
 
 	-- override plugin configs
@@ -85,14 +120,18 @@ return {
 
 	{
 		"lewis6991/gitsigns.nvim",
-    lazy = false,
+		lazy = false,
 		opts = overrides.gitsigns,
 	},
 
-	{
-		"hrsh7th/nvim-cmp",
-		opts = overrides.cmp,
-	},
+	-- {
+	-- 	"hrsh7th/nvim-cmp",
+	-- 	opts = overrides.cmp,
+	-- },
+
+	{ import = "nvchad.blink.lazyspec" },
+
+	{ "Saghen/blink.cmp", opts = {} },
 
 	-- Additional plugins
 
@@ -198,9 +237,9 @@ return {
 					["jpeg"] = true,
 					["gif"] = true,
 					["webp"] = true,
-					["heic"] = true
+					["heic"] = true,
 				},
-        build = "cd ttyimg && go build",
+				build = "cd ttyimg && go build",
 				auto_open = true, -- Automatically open images when buffer is loaded
 				oil_preview = true, -- changes oil preview of images too
 				backend = "kitty", -- kitty / iterm / sixel / auto (auto detects what is supported in your terminal)
@@ -216,30 +255,73 @@ return {
 		end,
 	},
 
+	-- {
+	-- 	"f-person/auto-dark-mode.nvim",
+	-- 	lazy = false,
+	-- 	config = function()
+	-- 		local auto_dark_mode = require("auto-dark-mode")
+	--
+	-- 		local function change_theme(theme_name)
+	-- 			print("Changing theme to: " .. theme_name)
+	-- 			-- Set the theme name
+	-- 			vim.g.nvchad_theme = theme_name
+	-- 			-- Clear theme cache and reload
+	-- 			package.loaded["base46"] = nil
+	-- 			package.loaded["base46.themes." .. theme_name] = nil
+	-- 			require("base46").load_all_highlights()
+	-- 			-- Force UI refresh
+	-- 			vim.cmd("redraw!")
+	-- 			-- Trigger theme reload events
+	-- 			vim.api.nvim_exec_autocmds("User", { pattern = "NvChadThemeReload" })
+	-- 		end
+	--
+	-- 		local function set_dark_mode()
+	-- 			print("Setting dark mode theme...")
+	-- 			vim.schedule(function()
+	-- 				change_theme("poimandres")
+	-- 				print("Dark mode theme set!")
+	-- 			end)
+	-- 		end
+	--
+	-- 		local function set_light_mode()
+	-- 			print("Setting light mode theme...")
+	-- 			vim.schedule(function()
+	-- 				change_theme("flexoki-light")
+	-- 				print("Light mode theme set!")
+	-- 			end)
+	-- 		end
+	--
+	-- 		auto_dark_mode.setup({
+	-- 			update_interval = 500,
+	-- 			set_dark_mode = set_dark_mode,
+	-- 			set_light_mode = set_light_mode,
+	-- 		})
+	--
+	-- 		-- Set initial theme based on current system appearance
+	-- 		local handle = io.popen('defaults read -g AppleInterfaceStyle 2>/dev/null')
+	-- 		local result = handle and handle:read("*a") or ""
+	-- 		handle:close()
+	--
+	-- 		if result:match("Dark") then
+	-- 			set_dark_mode()
+	-- 		else
+	-- 			set_light_mode()
+	-- 		end
+	--
+	-- 		auto_dark_mode.init()
+	-- 	end,
+	-- },
+
 	{
-		"f-person/auto-dark-mode.nvim",
-		config = function()
-			local auto_dark_mode = require("auto-dark-mode")
+		"lukas-reineke/indent-blankline.nvim",
+		main = "ibl",
+		---@module "ibl"
+		---@type ibl.config
+		opts = {},
+	},
 
-			auto_dark_mode.setup({
-				update_interval = 1000,
-				set_dark_mode = function()
-					-- Set the theme name
-					vim.g.nvchad_theme = "poimandres" -- your dark theme
-					-- Load base46 highlights
-					require("base46").load_all_highlights()
-					-- Trigger theme reload event
-					vim.api.nvim_exec_autocmds("User", { pattern = "NvThemeReload" })
-				end,
-				set_light_mode = function()
-					vim.g.nvchad_theme = "flexoki-light" -- your light theme
-					require("base46").load_all_highlights()
-					vim.api.nvim_exec_autocmds("User", { pattern = "NvThemeReload" })
-				end,
-			})
-
-			auto_dark_mode.init()
-		end,
+	{
+		"sindrets/diffview.nvim",
 	},
 
 	-- To make a plugin not be loaded
