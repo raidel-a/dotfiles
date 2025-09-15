@@ -324,6 +324,12 @@ return {
 		"sindrets/diffview.nvim",
 	},
 
+	{
+		"akinsho/git-conflict.nvim",
+		version = "*",
+		config = true,
+	},
+
 	-- To make a plugin not be loaded
 	-- {
 	--   "NvChad/nvim-colorizer.lua",

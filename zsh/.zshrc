@@ -33,12 +33,10 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-
 # bun completions
 [ -s "/Users/rai/.bun/_bun" ] && source "/Users/rai/.bun/_bun"
 
 [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
-
 
 alias claude="/Users/rai/.claude/local/claude"
 
@@ -46,6 +44,7 @@ export NVM_DIR="$HOME/.config/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-
 # Load Angular CLI autocompletion.
 source <(ng completion script)
+
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
