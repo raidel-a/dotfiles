@@ -49,4 +49,3 @@ source <(ng completion script)
 
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
