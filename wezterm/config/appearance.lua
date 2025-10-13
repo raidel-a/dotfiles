@@ -27,8 +27,8 @@ local bg_colors = {
 	Dark = ccolors.background,
 }
 local fg_colors = {
-  Light = ccolors.background,
-  Dark = ccolors.fg,
+	Light = ccolors.background,
+	Dark = ccolors.fg,
 }
 
 local appearance = wezterm.gui.get_appearance()
@@ -40,7 +40,7 @@ return {
 	enable_scroll_bar = false,
 	window_background_opacity = 0.90,
 	macos_window_background_blur = 0,
-	window_decorations = " RESIZE |INTEGRATED_BUTTONS",
+	window_decorations = " RESIZE |INTEGRATED_BUTTONS|MACOS_FORCE_ENABLE_SHADOW",
 	-- |INTEGRATED_BUTTONS
 	-- |MACOS_FORCE_ENABLE_SHADOW
 	pane_select_font_size = 60,
@@ -62,7 +62,7 @@ return {
 		bottom = "0.0cell",
 	},
 	inactive_pane_hsb = {
-		saturation = 0.0,
+		saturation = 0.2,
 		brightness = 0.8,
 	},
 	font = wezterm.font_with_fallback({
@@ -90,11 +90,11 @@ return {
 			inactive_tab = {
 				bg_color = ccolors.border,
 				fg_color = ccolors.fg_inactive,
-				italic = true,
 			},
 			inactive_tab_hover = {
 				bg_color = ccolors.border,
 				fg_color = ccolors.fg,
+				italic = true,
 			},
 			new_tab = {
 				bg_color = ccolors.border,

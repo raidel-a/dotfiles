@@ -55,7 +55,39 @@ map({ "n", "t" }, "<C-\\>", function()
 end, { desc = "Terminal Toggle Floating term" })
 
 -- File tree
--- map("n", "<C-a>", "<cmd>NvimTreeToggle<Cr>", { desc = "Toggle file tree" })
+-- Center floating nvim-tree
+map("n", "<Leader>e", function()
+	local api = require("nvim-tree.api")
+	local view = require("nvim-tree.view")
+	local overrides = require("configs.overrides")
+
+	-- If open, just close it
+	if view.is_visible() then
+		api.tree.close()
+		return
+	end
+
+	-- Configure for center floating and open
+	require("nvim-tree").setup(overrides.nvimtree_center)
+	api.tree.open()
+end, { desc = "Toggle nvim-tree (center floating)" })
+
+-- Right side nvim-tree
+map("n", "<C-n>", function()
+	local api = require("nvim-tree.api")
+	local view = require("nvim-tree.view")
+	local overrides = require("configs.overrides")
+
+	-- If open, just close it
+	if view.is_visible() then
+		api.tree.close()
+		return
+	end
+
+	-- Configure for right side and open
+	require("nvim-tree").setup(overrides.nvimtree)
+	api.tree.open()
+end, { desc = "Toggle nvim-tree (right side)" })
 
 -- LSP config
 map(

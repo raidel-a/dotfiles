@@ -1,5 +1,4 @@
 {
-    "global": { "unsafe_ui": true },
     "profiles": [
         {
             "complex_modifications": {
@@ -207,7 +206,7 @@
                 },
                 {
                     "from": { "key_code": "f4" },
-                    "to": [{ "pointing_button": "button2" }]
+                    "to": [{ "key_code": "vk_none" }]
                 },
                 {
                     "from": { "key_code": "f5" },

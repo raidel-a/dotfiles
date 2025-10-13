@@ -4,6 +4,9 @@
 
 local M = {}
 local primary = "#222222"
+local secondary = "#888888"
+-- local tertiary = "#666666"
+local tertiary ="#2D2C3C"
 local vanta = "#000000"
 ---@type Base46HLGroupsList
 M.override = {
@@ -11,25 +14,20 @@ M.override = {
 		italic = true,
 	},
 
-	-- NormalFloat = { bg = "#111111"},
-	-- FloatBorder = { bg = "#eeeeee"},
-	-- Float = { bg = "#111111"},
-	-- Normal = { bg = none },
-	-- Folded = {},
-	-- NvimTreeNormal = { bg = none },
-	-- NvimTreeNormalNC = { bg = none },
-	NvimTreeOpenedFolderName = { bold = true, underline = true },
-	CursorLine = { underline = false },
-	-- Pmenu = {},
-	-- CmpPmenu = {},
-	TbFill = { bg = vanta, fg = "#888888", underline = true },
-	tbBufOn = { bg = none, bold = true },
-	-- TbBufonClose = { bg = none, bold = true },
-	TbBufOff = { bg = vanta, italic = true, underline = false },
+	TbFill = { bg = vanta, fg = secondary },
+
+  TbBufOn = { bg = tertiary, fg = white },
+	TbBufOnClose = { bg = tertiary, bold = true },
+  TbBufOnModified = { bg = tertiary, bold = true },
+  -- TbBufOnTransparent xxx cterm=bold gui=bold guifg=#d9e0ee
+	
+  TbBufOff = { bg = vanta, italic = true, underline = false },
 	TbBufOffClose = { bg = vanta, bold = true, underline = false },
 	TbBufOffModified = { bg = vanta, underline = false },
-	WinSeparator = { fg = "#888888" },
-	NvimTreeWinSeparator = { fg = "#666666" },
+
+	WinSeparator = { fg = secondary },
+	NvimTreeOpenedFolderName = { bold = true, underline = true },
+	NvimTreeWinSeparator = { fg = tertiary },
 	-- NvimTreeCursor = { blend = 0 },
 	-- NvimTreeCursorLine = {
 	-- 	bg = "#2d3149",

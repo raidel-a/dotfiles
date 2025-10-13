@@ -84,7 +84,7 @@ return {
 			},
 			{
 				Foreground = {
-					Color = "white",
+					Color = ccolors.fg_statusbar,
 				},
 			},
 			{
@@ -113,7 +113,7 @@ return {
 			},
 			{
 				Foreground = {
-					Color = "white",
+					Color = "#770307",
 				},
 			},
 			{
@@ -143,7 +143,7 @@ return {
 			},
 			{
 				Foreground = {
-					Color = "white",
+					Color = "#846800",
 				},
 			},
 			{
@@ -173,7 +173,7 @@ return {
 			},
 			{
 				Foreground = {
-					Color = "white",
+					Color = "#168200",
 				},
 			},
 			{

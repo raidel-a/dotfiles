@@ -9,7 +9,7 @@ local header = require("header")
 M.base46 = {
 	theme = "catppuccin",
 	theme_toggle = { "rosepine-dawn", "catppuccin" },
-	transparency = false,
+	transparency = true,
 
 	hl_override = highlights.override,
 	hl_add = highlights.add,

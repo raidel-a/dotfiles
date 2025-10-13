@@ -14,23 +14,23 @@ local SSH = wezterm.nerdfonts.cod_remote
 local colors = {
   workspace = {
 	bg = ccolors.border,
-    fg = "rgb(210,10,100)",
+    fg = "#d20a64",
   },
   git = {
 	bg = ccolors.border,
-    fg = "rgb(210,110,10)",
+    fg = "#d26e0a",
   },
   cwd = {
 	bg = ccolors.border,
-    fg = "rgb(0,135,95)",
+    fg = "#00875f",
   },
   cmd = {
 	bg = ccolors.border,
-    fg = "rgb(10,190,200)",
+    fg = "#0abec8",
   },
   hostname = {
 	bg = ccolors.border,
-    fg = "rgb(250,200,30)",
+    fg = "#fac81e",
   },
 }
 
