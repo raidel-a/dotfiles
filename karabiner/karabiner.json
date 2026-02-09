@@ -4,6 +4,55 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Change right_command+hjkl to arrow keys",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "h",
+                                    "modifiers": {
+                                        "mandatory": ["right_command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "left_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "mandatory": ["right_command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": {
+                                        "mandatory": ["right_command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "up_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": {
+                                        "mandatory": ["right_command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "right_arrow" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "useful button 4 and 5 in safari",
                         "manipulators": [
                             {
@@ -103,6 +152,18 @@
                         {
                             "from": { "key_code": "escape" },
                             "to": [{ "key_code": "caps_lock" }]
+                        },
+                        {
+                            "from": { "apple_vendor_top_case_key_code": "keyboard_fn" },
+                            "to": [{ "key_code": "left_control" }]
+                        },
+                        {
+                            "from": { "key_code": "left_control" },
+                            "to": [{ "key_code": "left_option" }]
+                        },
+                        {
+                            "from": { "key_code": "left_option" },
+                            "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
                         }
                     ]
                 },
@@ -197,6 +258,27 @@
                         "vendor_id": 9639
                     },
                     "ignore": false
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 64008,
+                        "vendor_id": 9639
+                    },
+                    "simple_modifications": [
+                        {
+                            "from": { "key_code": "7" },
+                            "to": [{ "key_code": "volume_decrement" }]
+                        },
+                        {
+                            "from": { "key_code": "8" },
+                            "to": [{ "consumer_key_code": "play_or_pause" }]
+                        },
+                        {
+                            "from": { "key_code": "9" },
+                            "to": [{ "key_code": "volume_increment" }]
+                        }
+                    ]
                 }
             ],
             "fn_function_keys": [
@@ -206,7 +288,7 @@
                 },
                 {
                     "from": { "key_code": "f4" },
-                    "to": [{ "key_code": "vk_none" }]
+                    "to": [{ "key_code": "f4" }]
                 },
                 {
                     "from": { "key_code": "f5" },

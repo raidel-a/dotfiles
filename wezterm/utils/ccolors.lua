@@ -1,6 +1,7 @@
 local ccolors = {}
 
 ccolors.transparent = "rgba(0,0,0,0.0)"
+ccolors.semi_transparent = "rgba(10,10,10,1)"
 ccolors.background = "#141414"
 ccolors.light_background = "#EEE8D5"
 ccolors.border = "#222222"

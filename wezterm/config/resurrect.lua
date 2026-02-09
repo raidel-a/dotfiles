@@ -120,27 +120,20 @@ local resurrect_keys = {
                                             wezterm.action.PromptInputLine {
                                                 description = "Enter name for save (leave empty for timestamp):",
                                                 action = wezterm.action_callback(function(win3, pane3, name)
+                                                    -- Convert empty string to nil for timestamp generation
+                                                    if name == "" then
+                                                        name = nil
+                                                    end
+
                                                     if sub_id == "save_workspace" then
                                                         resurrect.save_state(resurrect.workspace_state.get_workspace_state(), name, "workspace")
                                                     elseif sub_id == "save_window" then
-                                                        if name and name ~= "" then
-                                                            resurrect.save_state(resurrect.window_state.get_window_state(win3), name, "window")
-                                                        else
-                                                            resurrect.window_state.save_window_action()(win3, pane3)
-                                                        end
+                                                        resurrect.save_state(resurrect.window_state.get_window_state(win3), name, "window")
                                                     elseif sub_id == "save_tab" then
-                                                        if name and name ~= "" then
-                                                            resurrect.save_state(resurrect.tab_state.get_tab_state(pane3:tab()), name, "tab")
-                                                        else
-                                                            resurrect.tab_state.save_tab_action()(win3, pane3)
-                                                        end
+                                                        resurrect.save_state(resurrect.tab_state.get_tab_state(pane3:tab()), name, "tab")
                                                     elseif sub_id == "save_workspace_window" then
                                                         resurrect.save_state(resurrect.workspace_state.get_workspace_state(), name, "workspace")
-                                                        if name and name ~= "" then
-                                                            resurrect.save_state(resurrect.window_state.get_window_state(win3), name, "window")
-                                                        else
-                                                            resurrect.window_state.save_window_action()(win3, pane3)
-                                                        end
+                                                        resurrect.save_state(resurrect.window_state.get_window_state(win3), name, "window")
                                                     end
                                                 end),
                                             },

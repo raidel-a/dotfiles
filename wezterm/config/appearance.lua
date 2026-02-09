@@ -1,20 +1,20 @@
 local wezterm = require("wezterm")
 local ccolors = require("utils.ccolors")
 
--- local function get_appearance()
---   if wezterm.gui then
---     return wezterm.gui.get_appearance()
---   end
---   return 'Dark'
--- end
---
--- local function scheme_for_appearance(appearance)
---   if appearance:find 'Dark' then
---     return 'Poimandres'
---   else
---     return 'Tokyo Night Light (Gogh)'
---   end
--- end
+local function get_appearance()
+  if wezterm.gui then
+    return wezterm.gui.get_appearance()
+  end
+  return 'Dark'
+end
+
+local function scheme_for_appearance(appearance)
+  if appearance:find 'Dark' then
+    return 'Poimandres'
+  else
+    return 'Tokyo Night Light (Gogh)'
+  end
+end
 local light_theme = "Tokyo Night Light (Gogh)"
 local dark_theme = "Poimandres"
 
@@ -38,7 +38,7 @@ return {
 	integrated_title_button_alignment = "Left",
 	integrated_title_buttons = { "Close", "Hide", "Maximize" },
 	enable_scroll_bar = false,
-	window_background_opacity = 0.90,
+	window_background_opacity = 0.85,
 	macos_window_background_blur = 0,
 	window_decorations = " RESIZE |INTEGRATED_BUTTONS|MACOS_FORCE_ENABLE_SHADOW",
 	-- |INTEGRATED_BUTTONS
@@ -83,7 +83,7 @@ return {
 		tab_bar = {
 			background = ccolors.border,
 			active_tab = {
-				bg_color = ccolors.transparent,
+				bg_color = ccolors.border,
 				fg_color = fg_colors[appearance],
 				intensity = "Bold",
 			},

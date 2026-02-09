@@ -38,6 +38,7 @@ return {
 							go = { "gofmt" },
 							cpp = { "clang_format" },
 							c = { "clang_format" },
+							java = { "google-java-format" },
 						},
 						format_on_save = {
 							timeout_ms = 500,
@@ -84,6 +85,7 @@ return {
 					"gopls", -- Go
 					"rust_analyzer", -- Rust
 					"tailwindcss",
+					"jdtls", -- Java
 				},
 				automatic_installation = true,
 			})
@@ -330,6 +332,13 @@ return {
 		config = true,
 	},
 
+	{
+		"apyra/nvim-unity-sync",
+		lazy = false,
+		config = function()
+			require("unity.plugin").setup()
+		end,
+	},
 	-- To make a plugin not be loaded
 	-- {
 	--   "NvChad/nvim-colorizer.lua",

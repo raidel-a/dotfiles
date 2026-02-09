@@ -2,50 +2,42 @@
 # Main Zsh configuration file that loads all modular configs
 
 # Enable Starship's instant prompt
-# export STARSHIP_LOG="error"
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/starship/init.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/starship/init.zsh"
 fi
-
-# Source Deno environment
-. "/Users/rai/.deno/env"
-
-# Source local environment
-. "$HOME/.local/bin/env"
 
 # Load all modular configurations
 for conf in "$ZDOTDIR/conf.d/"*.zsh; do
     source "$conf"
 done
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
+# opencode
+export PATH=/Users/rai/.opencode/bin:$PATH
+#compdef opencode
+###-begin-opencode-completions-###
+#
+# yargs command completion script
+#
+# Installation: opencode completion >> ~/.zshrc
+#    or opencode completion >> ~/.zprofile on OSX.
+#
+_opencode_yargs_completions()
+{
+  local reply
+  local si=$IFS
+  IFS=$'
+' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" opencode --get-yargs-completions "${words[@]}"))
+  IFS=$si
+  if [[ ${#reply} -gt 0 ]]; then
+    _describe 'values' reply
+  else
+    _default
+  fi
+}
+if [[ "'${zsh_eval_context[-1]}" == "loadautofunc" ]]; then
+  _opencode_yargs_completions "$@"
 else
-    if [ -f "/opt/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/opt/anaconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/opt/anaconda3/bin:$PATH"
-    fi
+  compdef _opencode_yargs_completions opencode
 fi
-unset __conda_setup
-# <<< conda initialize <<<
+###-end-opencode-completions-###
 
-# bun completions
-[ -s "/Users/rai/.bun/_bun" ] && source "/Users/rai/.bun/_bun"
-
-[[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
-
-alias claude="/Users/rai/.claude/local/claude"
-
-export NVM_DIR="$HOME/.config/nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Load Angular CLI autocompletion.
-source <(ng completion script)
-
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-export PATH="/opt/homebrew/sbin:$PATH"
