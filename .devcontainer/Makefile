@@ -27,8 +27,13 @@ build: check
 # Push to GHCR
 push: 
 	@echo "Logging in to GHCR..."
-	@echo "Note: Make sure GH_TOKEN environment variable is set"
-	@echo "$$GH_TOKEN" | docker login ghcr.io -u raidel-a --password-stdin
+	@echo "Using gh CLI for authentication..."
+	@if command -v gh >/dev/null 2>&1; then \
+		gh auth token | docker login ghcr.io -u raidel-a --password-stdin; \
+	else \
+		echo "Error: gh CLI not found. Install it or set GH_TOKEN manually"; \
+		exit 1; \
+	fi
 	@echo "Pushing images..."
 	docker push $(TAG_LATEST)
 	docker push $(TAG_COMMIT)

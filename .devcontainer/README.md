@@ -52,9 +52,12 @@ In your project's `.devcontainer/devcontainer.json`:
   "image": "ghcr.io/raidel-a/devcontainer-base:latest",
   "features": {
     "ghcr.io/devcontainers/features/sshd:1": {}
-  }
+  },
+  "runArgs": ["-p", "2222:2222"]
 }
 ```
+
+**Important:** The `runArgs` with `-p 2222:2222` is required to expose the SSH port for WezTerm multiplexing to work.
 
 ## Connecting via WezTerm
 
