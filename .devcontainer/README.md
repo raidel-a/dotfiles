@@ -29,12 +29,17 @@ make build
 
 ### Push to GitHub Container Registry
 
+The Makefile automatically uses `gh` CLI for authentication:
+
 ```bash
-export GH_TOKEN=<your-github-token>
+# First, ensure gh CLI has write:packages scope
+gh auth refresh -h github.com -s write:packages
+
+# Then push
 make push
 ```
 
-Make sure your token has `write:packages` permission.
+The push command will automatically use `gh auth token` - no need to manually set environment variables.
 
 ### View tags
 
@@ -70,21 +75,43 @@ See the WezTerm config in `../wezterm/utils/devcontainer.lua` for implementation
 
 ## SSH Key Setup
 
-Generate a dedicated SSH key for devcontainers:
+A dedicated SSH key is required for WezTerm to connect to containers. Generate it with:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/id_devcontainer -N ""
 ```
 
-This key will be used by WezTerm to connect to containers.
+This key is automatically added to containers' authorized_keys via the install.sh script.
+
+**Note:** The key should already be generated if you've completed the initial setup.
 
 ## Workflow
 
-1. Build and push the base image (do this once, or when you update dotfiles)
-2. Create project devcontainers using this base image
-3. Start the devcontainer in VS Code or via `devcontainer up`
-4. Press Cmd+P in WezTerm to connect to the running container
+### Initial Setup (One Time)
+
+1. Generate SSH key: `ssh-keygen -t ed25519 -f ~/.ssh/id_devcontainer -N ""`
+2. Build base image: `cd ~/.config/.devcontainer && make build`
+3. Push to GHCR: `gh auth refresh -h github.com -s write:packages && make push`
+
+### For Each Project
+
+1. Create `.devcontainer/devcontainer.json` in your project (see example above)
+2. Start container: `devcontainer up --workspace-folder .`
+3. Press **Cmd+P** in WezTerm
+4. Select your container from the list
 5. Work with full Neovim performance inside the container
+
+### Updating the Base Image
+
+When you update your dotfiles and want new containers to use the latest config:
+
+```bash
+cd ~/.config/.devcontainer
+make build
+make push
+```
+
+Existing containers can pull updates automatically via the `postStartCommand`.
 
 ## Notes
 
@@ -92,3 +119,24 @@ This key will be used by WezTerm to connect to containers.
 - SSH agent forwarding is enabled for Git operations
 - Dotfiles are auto-updated on container start via `postStartCommand`
 - Timezone is set to America/Los_Angeles (change in devcontainer.json if needed)
+- The `runArgs` with `-p 2222:2222` is **required** for SSH port exposure
+
+## Troubleshooting
+
+### Container not appearing in Cmd+P menu
+- Verify port 2222 is exposed: `docker ps`
+- Check if runArgs includes `-p 2222:2222` in devcontainer.json
+- Restart WezTerm to reload the config
+
+### SSH connection fails
+- Ensure `~/.ssh/id_devcontainer` exists with correct permissions (600)
+- Verify the public key is in the container: `docker exec <container-id> cat /home/vscode/.ssh/authorized_keys`
+- Test direct SSH: `ssh -p 2222 -i ~/.ssh/id_devcontainer vscode@127.0.0.1`
+
+### Multiple containers conflict
+Each container needs a unique host port. Use different ports like:
+- Container 1: `"runArgs": ["-p", "2222:2222"]`
+- Container 2: `"runArgs": ["-p", "2223:2222"]`
+- Container 3: `"runArgs": ["-p", "2224:2222"]`
+
+WezTerm will automatically discover containers on any port.
