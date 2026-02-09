@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/refs/heads/main/schemas/devContainer.base.schema.json",
+  "name": "devcontainer-base",
+  "build": {
+    "dockerfile": "./Dockerfile",
+    "context": "..",
+    "args": {
+      "DOTFILES_REPO": "https://github.com/raidel-a/dotfiles",
+      "GIT_SSH_REWRITE": "off"
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
+  "mounts": [
+    "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind"
+  ],
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/home/vscode/.ssh/ssh-agent",
+    "TZ": "America/Los_Angeles"
+  },
+  "postStartCommand": "cd ~/.config && git pull --ff-only || true"
+}

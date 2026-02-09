@@ -6,6 +6,7 @@ local keybinds = require("config.keybinds")
 local tabs = require("config.tabs")
 local statusbar = require("config.statusbar")
 local resurrect = require("config.resurrect")
+local devcontainer = require("config.devcontainer")
 
 -- Initialize base config
 local config = {}
@@ -32,5 +33,6 @@ merge_config(keybinds)
 merge_config(tabs)
 merge_config(statusbar)
 merge_config(resurrect)
+merge_config(devcontainer)
 
 return config
