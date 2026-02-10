@@ -128,20 +128,23 @@ M.show_domain_selector = function()
   -- Build choices for selector
   local choices = {}
   local container_list = {}
+  local idx = 1
   
   for name, data in pairs(M.devpods) do
     if data.ports["2222/tcp"] then
       local display_name = data.workspace or name
       local port = data.ports["2222/tcp"]
       table.insert(choices, {
+        id = tostring(idx - 1),
         label = string.format("%s (port %s)", display_name, port),
       })
-      table.insert(container_list, {
+      container_list[idx] = {
         name = name,
         display_name = display_name,
         port = port,
         user = data.user or "vscode",
-      })
+      }
+      idx = idx + 1
     end
   end
 
@@ -165,31 +168,33 @@ M.show_domain_selector = function()
           local selected_idx = tonumber(id) + 1
           local container = container_list[selected_idx]
           
-          if container then
-            wezterm.log_info("Connecting to container: " .. container.name .. " on port " .. container.port)
-            
-            -- Spawn SSH connection in new tab
-            window:perform_action(
-              wezterm.action.SpawnCommandInNewTab({
-                label = container.display_name,
-                args = {
-                  "ssh",
-                  "-p",
-                  container.port,
-                  "-l",
-                  container.user,
-                  "-i",
-                  wezterm.home_dir .. "/.ssh/id_devcontainer",
-                  "-o",
-                  "StrictHostKeyChecking=no",
-                  "-o",
-                  "UserKnownHostsFile=/dev/null",
-                  "127.0.0.1",
-                },
-              }),
-              pane
-            )
+          if not container then
+            wezterm.log_error("Could not find container at index: " .. tostring(selected_idx))
+            return
           end
+          
+          wezterm.log_info("Connecting to container: " .. container.name .. " on port " .. container.port)
+          
+          -- Spawn SSH connection in new tab
+          window:perform_action(
+            wezterm.action.SpawnCommandInNewTab({
+              args = {
+                "ssh",
+                "-p",
+                container.port,
+                "-l",
+                container.user,
+                "-i",
+                wezterm.home_dir .. "/.ssh/id_devcontainer",
+                "-o",
+                "StrictHostKeyChecking=no",
+                "-o",
+                "UserKnownHostsFile=/dev/null",
+                "127.0.0.1",
+              },
+            }),
+            pane
+          )
         end),
         title = "Select Devcontainer",
         choices = choices,
