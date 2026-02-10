@@ -64,10 +64,33 @@ In your project's `.devcontainer/devcontainer.json`:
 
 **Important:** The `runArgs` with `-p 2222:2222` is required to expose the SSH port for WezTerm multiplexing to work.
 
+### Multiple Containers
+
+WezTerm is pre-configured with SSH domains for ports 2222-2231, allowing up to **10 concurrent containers**. 
+
+If you need multiple containers running simultaneously, assign different host ports:
+
+```json
+// Container 1
+"runArgs": ["-p", "2222:2222"]
+
+// Container 2
+"runArgs": ["-p", "2223:2222"]
+
+// Container 3
+"runArgs": ["-p", "2224:2222"]
+```
+
+The Cmd+P selector will automatically discover all running containers on any of these ports.
+
 ## Connecting via WezTerm
 
 Once the container is running, use the WezTerm multiplexing keybind (Cmd+P) to:
 1. Discover running containers
+2. Select the container you want to connect to
+3. Connect via **true WezTerm multiplexing** (not plain SSH)
+
+This provides significantly better performance than regular SSH - no redraw lag, smooth scrolling, and local terminal responsiveness.
 2. Select the container you want to connect to
 3. Connect seamlessly with full local WezTerm performance
 
@@ -120,6 +143,8 @@ Existing containers can pull updates automatically via the `postStartCommand`.
 - Dotfiles are auto-updated on container start via `postStartCommand`
 - Timezone is set to America/Los_Angeles (change in devcontainer.json if needed)
 - The `runArgs` with `-p 2222:2222` is **required** for SSH port exposure
+- **WezTerm Multiplexing:** Connections use true WezTerm multiplexing (not plain SSH) for optimal performance
+- **Pre-allocated Domains:** SSH domains for ports 2222-2231 are pre-configured (10 concurrent containers max)
 
 ## Troubleshooting
 
@@ -134,9 +159,14 @@ Existing containers can pull updates automatically via the `postStartCommand`.
 - Test direct SSH: `ssh -p 2222 -i ~/.ssh/id_devcontainer vscode@127.0.0.1`
 
 ### Multiple containers conflict
-Each container needs a unique host port. Use different ports like:
-- Container 1: `"runArgs": ["-p", "2222:2222"]`
-- Container 2: `"runArgs": ["-p", "2223:2222"]`
-- Container 3: `"runArgs": ["-p", "2224:2222"]`
+Each container needs a unique host port, but the container's internal port is always 2222.
 
-WezTerm will automatically discover containers on any port.
+**Port Allocation:**
+- WezTerm pre-allocates SSH domains for ports 2222-2231 (10 slots)
+- Each container should use a unique host port in this range
+- Example configurations:
+  - Container 1: `"runArgs": ["-p", "2222:2222"]`
+  - Container 2: `"runArgs": ["-p", "2223:2222"]`
+  - Container 3: `"runArgs": ["-p", "2224:2222"]`
+
+The selector will automatically detect containers on any of these ports and connect using WezTerm multiplexing.
