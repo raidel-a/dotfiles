@@ -1,8 +1,8 @@
 local wezterm = require("wezterm")
 local devcontainer = require("utils.devcontainer")
 
--- Configure SSH domains for devcontainer multiplexing
-local ssh_domains = devcontainer.create_ssh_domains()
+-- Pre-allocate SSH domains for ports 2222-2231 (supports up to 10 concurrent containers)
+local ssh_domains = devcontainer.generate_ssh_domains()
 
 -- Add keybinding for container selector
 local keys = {

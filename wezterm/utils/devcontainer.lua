@@ -2,6 +2,26 @@ local wezterm = require("wezterm")
 
 local M = {}
 
+-- Pre-allocate SSH domains for ports 2222-2231 (10 concurrent containers)
+M.generate_ssh_domains = function()
+  local domains = {}
+  for port = 2222, 2231 do
+    table.insert(domains, {
+      name = "devcontainer-" .. port,
+      remote_address = "127.0.0.1:" .. port,
+      username = "vscode",
+      connect_automatically = false,
+      multiplexing = "WezTerm",
+      remote_wezterm_path = "/usr/bin/wezterm",
+      ssh_option = {
+        identityfile = "~/.ssh/id_devcontainer",
+        forwardagent = "yes",
+      },
+    })
+  end
+  return domains
+end
+
 -- Get running container IDs
 M.get_container_ids = function()
   local container_ids = {}
@@ -31,7 +51,9 @@ end
 M.extract_workspace_name = function(image)
   local workspace = image:match("^([^:]+)")
   if workspace then
-    workspace = workspace:match("^(.*)%-.+$") or workspace
+    -- Clean up long devcontainer image names
+    workspace = workspace:gsub("^vsc%-", "")
+    workspace = workspace:match("^([^%-]+)") or workspace
   end
   return workspace
 end
@@ -58,14 +80,19 @@ M.get_devpod_info = function()
         if name and image and ports then
           local workspace = M.extract_workspace_name(image)
           local port_map = M.map_ports(ports)
-          devpods[name] = {
-            ip = ip,
-            image = image,
-            workspace = workspace,
-            state = state,
-            user = user ~= "" and user or nil,
-            ports = port_map,
-          }
+          
+          -- Only include containers with SSH port exposed
+          if port_map["2222/tcp"] then
+            devpods[name] = {
+              ip = ip,
+              image = image,
+              workspace = workspace,
+              state = state,
+              user = user ~= "" and user or nil,
+              port = port_map["2222/tcp"],
+              domain_name = "devcontainer-" .. port_map["2222/tcp"],
+            }
+          end
         end
       end
     end
@@ -75,44 +102,6 @@ M.get_devpod_info = function()
   return devpods
 end
 
--- SSH domains cache
-M.ssh_domains = {}
-
--- Create SSH domains for WezTerm multiplexing
-M.create_ssh_domains = function()
-  -- Only regenerate if cache is empty
-  if next(M.ssh_domains) ~= nil then
-    return M.ssh_domains
-  end
-
-  -- Refresh container info
-  if next(M.devpods) == nil then
-    M.devpods = M.get_devpod_info()
-  end
-
-  -- Generate SSH domains
-  for name, data in pairs(M.devpods) do
-    -- Check if container has SSH port exposed
-    local ssh_port = data.ports["2222/tcp"]
-    if ssh_port then
-      table.insert(M.ssh_domains, {
-        name = data.workspace or name,
-        remote_address = string.format("127.0.0.1:%s", ssh_port),
-        username = data.user or "vscode",
-        connect_automatically = false,
-        multiplexing = "WezTerm",
-        remote_wezterm_path = "/usr/bin/wezterm",
-        ssh_option = {
-          identityfile = "~/.ssh/id_devcontainer",
-          forwardagent = "yes",
-        },
-      })
-    end
-  end
-
-  return M.ssh_domains
-end
-
 -- Show container selector
 M.show_domain_selector = function()
   -- Refresh container info
@@ -120,7 +109,7 @@ M.show_domain_selector = function()
 
   if not M.devpods or not next(M.devpods) then
     return wezterm.action.ShowLauncherArgs({
-      title = "No devcontainers found",
+      title = "No devcontainers found with SSH (port 2222) exposed",
       flags = "FUZZY",
     })
   end
@@ -131,28 +120,18 @@ M.show_domain_selector = function()
   local idx = 1
   
   for name, data in pairs(M.devpods) do
-    if data.ports["2222/tcp"] then
-      local display_name = data.workspace or name
-      local port = data.ports["2222/tcp"]
-      table.insert(choices, {
-        id = tostring(idx - 1),
-        label = string.format("%s (port %s)", display_name, port),
-      })
-      container_list[idx] = {
-        name = name,
-        display_name = display_name,
-        port = port,
-        user = data.user or "vscode",
-      }
-      idx = idx + 1
-    end
-  end
-
-  if #choices == 0 then
-    return wezterm.action.ShowLauncherArgs({
-      title = "No devcontainers with SSH (port 2222) found",
-      flags = "FUZZY",
+    local display_name = data.workspace or name
+    table.insert(choices, {
+      id = tostring(idx - 1),
+      label = string.format("%s (port %s)", display_name, data.port),
     })
+    container_list[idx] = {
+      name = name,
+      display_name = display_name,
+      port = data.port,
+      domain_name = data.domain_name,
+    }
+    idx = idx + 1
   end
 
   return wezterm.action_callback(function(window, pane)
@@ -173,24 +152,14 @@ M.show_domain_selector = function()
             return
           end
           
-          wezterm.log_info("Connecting to container: " .. container.name .. " on port " .. container.port)
+          wezterm.log_info("Connecting to domain: " .. container.domain_name)
           
-          -- Spawn SSH connection in new tab
+          -- Connect using WezTerm multiplexing via pre-defined SSH domain
           window:perform_action(
-            wezterm.action.SpawnCommandInNewTab({
-              args = {
-                "ssh",
-                "-p",
-                container.port,
-                "-l",
-                container.user,
-                "-i",
-                wezterm.home_dir .. "/.ssh/id_devcontainer",
-                "-o",
-                "StrictHostKeyChecking=no",
-                "-o",
-                "UserKnownHostsFile=/dev/null",
-                "127.0.0.1",
+            wezterm.action.SwitchToWorkspace({
+              name = container.display_name,
+              spawn = {
+                domain = { DomainName = container.domain_name },
               },
             }),
             pane
