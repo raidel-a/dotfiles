@@ -115,12 +115,10 @@ end
 
 -- Show container selector
 M.show_domain_selector = function()
-  -- Refresh domains
-  M.ssh_domains = {}
-  M.devpods = {}
-  local domains = M.create_ssh_domains()
+  -- Refresh container info
+  M.devpods = M.get_devpod_info()
 
-  if #domains == 0 then
+  if not M.devpods or not next(M.devpods) then
     return wezterm.action.ShowLauncherArgs({
       title = "No devcontainers found",
       flags = "FUZZY",
@@ -129,10 +127,28 @@ M.show_domain_selector = function()
 
   -- Build choices for selector
   local choices = {}
-  for _, domain in ipairs(domains) do
-    local container_info = M.devpods[domain.name] or {}
-    table.insert(choices, {
-      label = string.format("%s (%s)", domain.name, container_info.image or "unknown"),
+  local container_list = {}
+  
+  for name, data in pairs(M.devpods) do
+    if data.ports["2222/tcp"] then
+      local display_name = data.workspace or name
+      local port = data.ports["2222/tcp"]
+      table.insert(choices, {
+        label = string.format("%s (port %s)", display_name, port),
+      })
+      table.insert(container_list, {
+        name = name,
+        display_name = display_name,
+        port = port,
+        user = data.user or "vscode",
+      })
+    end
+  end
+
+  if #choices == 0 then
+    return wezterm.action.ShowLauncherArgs({
+      title = "No devcontainers with SSH (port 2222) found",
+      flags = "FUZZY",
     })
   end
 
@@ -145,24 +161,34 @@ M.show_domain_selector = function()
             return
           end
           
-          -- Extract container name from label
-          local container_name = label:match("^([^%s]+)")
+          -- Find the selected container
+          local selected_idx = tonumber(id) + 1
+          local container = container_list[selected_idx]
           
-          -- Find the matching domain
-          for _, domain in ipairs(domains) do
-            if domain.name == container_name then
-              wezterm.log_info("Connecting to domain: " .. domain.name)
-              window:perform_action(
-                wezterm.action.SwitchToWorkspace({
-                  name = domain.name,
-                  spawn = {
-                    domain = { DomainName = domain.name },
-                  },
-                }),
-                pane
-              )
-              return
-            end
+          if container then
+            wezterm.log_info("Connecting to container: " .. container.name .. " on port " .. container.port)
+            
+            -- Spawn SSH connection in new tab
+            window:perform_action(
+              wezterm.action.SpawnCommandInNewTab({
+                label = container.display_name,
+                args = {
+                  "ssh",
+                  "-p",
+                  container.port,
+                  "-l",
+                  container.user,
+                  "-i",
+                  wezterm.home_dir .. "/.ssh/id_devcontainer",
+                  "-o",
+                  "StrictHostKeyChecking=no",
+                  "-o",
+                  "UserKnownHostsFile=/dev/null",
+                  "127.0.0.1",
+                },
+              }),
+              pane
+            )
           end
         end),
         title = "Select Devcontainer",
