@@ -154,8 +154,8 @@ M.show_domain_selector = function()
           
           wezterm.log_info("Connecting to domain: " .. container.domain_name .. " in workspace: " .. container.display_name)
           
-          -- Switch to a named workspace and spawn into the SSH domain
-          -- This creates a new window in the workspace with the container connection
+          -- Simplest approach: just switch workspace with spawn
+          -- If this creates 2 tabs, it's likely a WezTerm behavior we need to work around
           window:perform_action(
             wezterm.action.SwitchToWorkspace({
               name = container.display_name,
