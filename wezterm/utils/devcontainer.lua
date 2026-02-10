@@ -152,19 +152,16 @@ M.show_domain_selector = function()
             return
           end
           
-          wezterm.log_info("Connecting to domain: " .. container.domain_name)
+          wezterm.log_info("Connecting to domain: " .. container.domain_name .. " in workspace: " .. container.display_name)
           
-          -- First, attach the SSH domain (this triggers the connection)
-          -- Then switch to a workspace and spawn into that domain
+          -- Switch to a named workspace and spawn into the SSH domain
+          -- This creates a new window in the workspace with the container connection
           window:perform_action(
-            wezterm.action.Multiple({
-              wezterm.action.AttachDomain(container.domain_name),
-              wezterm.action.SwitchToWorkspace({
-                name = container.display_name,
-                spawn = {
-                  domain = { DomainName = container.domain_name },
-                },
-              }),
+            wezterm.action.SwitchToWorkspace({
+              name = container.display_name,
+              spawn = {
+                domain = { DomainName = container.domain_name },
+              },
             }),
             pane
           )
