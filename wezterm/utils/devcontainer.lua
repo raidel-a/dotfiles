@@ -13,6 +13,7 @@ M.generate_ssh_domains = function()
       connect_automatically = false,
       multiplexing = "WezTerm",
       remote_wezterm_path = "/usr/bin/wezterm",
+      assume_shell = "Posix",  -- Prevents automatic shell detection spawn
       ssh_option = {
         identityfile = "~/.ssh/id_devcontainer",
         forwardagent = "yes",
@@ -154,8 +155,10 @@ M.show_domain_selector = function()
           
           wezterm.log_info("Connecting to domain: " .. container.domain_name .. " in workspace: " .. container.display_name)
           
-          -- Simplest approach: just switch workspace with spawn
-          -- If this creates 2 tabs, it's likely a WezTerm behavior we need to work around
+          -- Store reference to current pane before switching
+          local source_pane = pane
+          
+          -- Switch to workspace and spawn
           window:perform_action(
             wezterm.action.SwitchToWorkspace({
               name = container.display_name,
@@ -165,6 +168,14 @@ M.show_domain_selector = function()
             }),
             pane
           )
+          
+          -- Close the pane from the source workspace after a small delay
+          -- This prevents leaving the selector pane open
+          wezterm.time.call_after(0.3, function()
+            if source_pane:pane_id() then
+              source_pane:tab():panes()[1]:send_text("")  -- Clear any pending input
+            end
+          end)
         end),
         title = "Select Devcontainer",
         choices = choices,
