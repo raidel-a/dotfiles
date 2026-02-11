@@ -4,14 +4,21 @@ local devcontainer = require("utils.devcontainer")
 -- Pre-allocate SSH domains for ports 2222-2231 (supports up to 10 concurrent containers)
 local ssh_domains = devcontainer.generate_ssh_domains()
 
--- Add keybinding for container selector
+-- Add keybindings for devcontainer features
 local keys = {
+  -- Cmd+P: Show devcontainer selector
   {
     key = "p",
     mods = "CMD",
     action = wezterm.action_callback(function(window, pane)
       window:perform_action(devcontainer.show_domain_selector(), pane)
     end),
+  },
+  -- Cmd+9: Show workspace switcher
+  {
+    key = "9",
+    mods = "CMD",
+    action = wezterm.action.ShowLauncherArgs({ flags = "WORKSPACES" }),
   },
 }
 
