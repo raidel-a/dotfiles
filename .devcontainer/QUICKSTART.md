@@ -10,23 +10,53 @@ Your devcontainer system is now fully configured with:
 
 ## Using Devcontainers
 
+### Simplest Approach (Recommended)
+
+For any project, copy the example template and customize:
+
+```bash
+# In your project directory
+cd ~/my-new-project
+mkdir -p .devcontainer
+cp ~/.config/.devcontainer/templates/example-project.json .devcontainer/devcontainer.json
+
+# Edit the file and change:
+# 1. "name": "my-project" -> your project name
+# 2. "runArgs": ["-p", "2222:2222"] -> change port if you have multiple containers
+#    (use 2222 for first project, 2223 for second, 2224 for third, etc.)
+```
+
+That's it! Now start the container (see step 2 below).
+
+### Language-Specific Templates (Optional)
+
+If you need language-specific features, other templates are available:
+- `nodejs-devcontainer.json` - Node.js with optimized node_modules volume
+- `python-devcontainer.json` - Python with pip cache
+- `basic-devcontainer.json` - Same as example-project.json
+
+### Step-by-Step Workflow
+
 ### 1. Create a New Project
+
+### 1. Create a New Project
+
+See "Simplest Approach" above for the quickest way.
+
+Alternative detailed steps:
 
 ```bash
 # Create project directory
 mkdir ~/my-new-project
 cd ~/my-new-project
 
-# Create .devcontainer directory
+# Copy template
 mkdir .devcontainer
+cp ~/.config/.devcontainer/templates/example-project.json .devcontainer/devcontainer.json
 
-# Copy a template
-cp ~/.config/.devcontainer/templates/basic-devcontainer.json .devcontainer/devcontainer.json
-
-# Customize the config
-# - Change "name": "PROJECT_NAME" to your project name
-# - If you have multiple containers running, change the port:
-#   "runArgs": ["-p", "2223:2222"]  (use 2223, 2224, etc.)
+# Edit and customize name + port
+# Change "name": "my-project" to your actual project name
+# Change port if needed: "runArgs": ["-p", "2223:2222"]
 ```
 
 ### 2. Start the Container
@@ -40,9 +70,15 @@ Your project files will be mounted at `/workspace` in the container.
 
 ### 3. Connect via WezTerm
 
+**Cmd+P**: Select and connect to a container
 1. Press **Cmd+P** in WezTerm
 2. Select your container from the fuzzy finder
 3. You're now inside the container with full terminal performance!
+
+**Cmd+9**: Switch between workspaces (when you have multiple containers)
+1. Press **Cmd+9** to see all active workspaces
+2. Select a workspace to switch to it
+3. Each container gets its own workspace (e.g., "my-project", "urls")
 
 All your dotfiles (nvim, zsh, etc.) are available inside the container.
 
@@ -88,19 +124,22 @@ docker rm <container-name>
 devcontainer up --workspace-folder . --remove-existing-container
 ```
 
-## Templates
+## Available Templates
 
-### Basic Template
-Minimal setup with workspace mounting. Use for any project.
+### example-project.json (Recommended Start)
+Generic template for any project. Just change name and port.
 
-### Node.js Template
+### basic-devcontainer.json
+Same as example-project.json. Minimal setup with workspace mounting.
+
+### nodejs-devcontainer.json
 Includes:
 - Node.js LTS
 - `node_modules` as named volume (much faster on Mac)
 - Auto `npm install` on creation
 - Common ports forwarded (3000, 5173, 8080)
 
-### Python Template  
+### python-devcontainer.json
 Includes:
 - Python 3.12
 - Pip cache as volume

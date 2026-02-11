@@ -49,15 +49,33 @@ make tags
 
 ## Using in Projects
 
-### Quick Start Templates
+### Two Approaches
+
+**Option A: Quick Copy (Simplest)**
+
+Copy the example template and customize:
+
+```bash
+# In your project directory
+mkdir -p .devcontainer
+cp ~/.config/.devcontainer/templates/example-project.json .devcontainer/devcontainer.json
+
+# Edit and change:
+# 1. "name": "my-project" -> your project name
+# 2. "runArgs": ["-p", "2222:2222"] -> unique port (2222, 2223, 2224, etc.)
+# 3. "TZ": "America/New_York" -> your timezone (optional)
+```
+
+**Option B: Language-Specific Templates**
 
 Templates are available in `.devcontainer/templates/`:
 
+- `example-project.json` - Generic template (start here)
 - `basic-devcontainer.json` - Minimal setup with workspace mounting
 - `nodejs-devcontainer.json` - Node.js with npm/yarn/pnpm support
 - `python-devcontainer.json` - Python with pip and virtual environment
 
-### Basic Setup (Recommended)
+### Basic Configuration Example
 
 In your project's `.devcontainer/devcontainer.json`:
 
