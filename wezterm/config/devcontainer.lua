@@ -18,4 +18,6 @@ local keys = {
 return {
   ssh_domains = ssh_domains,
   keys = keys,
+  -- Prevent workspaces from creating new windows
+  prefer_to_spawn_tabs = true,
 }
