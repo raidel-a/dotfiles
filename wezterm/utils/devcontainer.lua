@@ -68,7 +68,7 @@ M.get_devpod_info = function()
 
   for _, id in ipairs(ids) do
     local cmd = string.format(
-      "docker inspect -f '{{.Name}} {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{.Config.Image}} {{.State.Status}} {{.Config.User}} {{range $p, $conf := .NetworkSettings.Ports}}{{$p}}->{{if $conf}}{{(index $conf 0).HostPort}}{{end}} {{end}}' %s",
+      "docker inspect -f '{{.Name}} {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{.Config.Image}} {{.State.Status}} {{.Config.User}} {{range $p, $conf := .NetworkSettings.Ports}}{{$p}}->{{if $conf}}{{(index $conf 0).HostPort}}{{end}} {{end}} {{index .Config.Labels \"devcontainer.local_folder\"}}' %s",
       id
     )
     local handle = io.popen(cmd)
@@ -76,9 +76,18 @@ M.get_devpod_info = function()
       local line = handle:read("*l")
       handle:close()
       if line then
-        local name, ip, image, state, user, ports = line:match("^/(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S*)%s*(.*)$")
+        local name, ip, image, state, user, ports, local_folder = line:match("^/(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S*)%s+(.*)%s+(%S*)$")
         if name and image and ports then
-          local workspace = M.extract_workspace_name(image)
+          -- Extract workspace name from local_folder path (e.g., /Users/rai/Desktop/urls -> urls)
+          local workspace
+          if local_folder and local_folder ~= "" then
+            workspace = local_folder:match("([^/]+)$")
+          end
+          -- Fallback to image-based extraction if no local_folder label
+          if not workspace then
+            workspace = M.extract_workspace_name(image)
+          end
+          
           local port_map = M.map_ports(ports)
           
           -- Only include containers with SSH port exposed
