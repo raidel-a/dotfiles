@@ -38,6 +38,11 @@ ENV HOME=/home/vscode
 RUN NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
+# Install essential tools via Homebrew
+# Installing them directly instead of via Brewfile for reliability
+RUN brew install --quiet neovim starship eza fzf ripgrep fd direnv gh git-delta lazygit bat && \
+  brew cleanup
+
 # Clone dotfiles repo to .config (matching your macOS structure)
 RUN git clone --depth=1 $DOTFILES_REPO ~/.config && \
   chmod +x ~/.config/install.sh && \
