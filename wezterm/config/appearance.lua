@@ -33,24 +33,24 @@ local fg_colors = {
 
 -- Always use dark theme to avoid light mode appearing in workspace windows
 -- If you want to respect system appearance, change this to: get_appearance()
-local appearance = "Dark"  -- Force dark mode for all windows
+local appearance = get_appearance()  -- Force dark mode for all windows
 
 -- Force dark theme for SSH domains (devcontainer workspaces)
 -- to ensure consistent appearance across workspaces
-wezterm.on("update-status", function(window, pane)
-  local domain = pane:get_domain_name()
-  if domain and domain:match("^devcontainer%-") then
-    -- This pane is in a devcontainer domain, ensure dark theme
-    local overrides = window:get_config_overrides() or {}
-    if overrides.color_scheme ~= dark_theme then
-      overrides.color_scheme = dark_theme
-      overrides.colors = {
-        background = ccolors.background,
-      }
-      window:set_config_overrides(overrides)
-    end
-  end
-end)
+-- wezterm.on("update-status", function(window, pane)
+--   local domain = pane:get_domain_name()
+--   if domain and domain:match("^devcontainer%-") then
+--     -- This pane is in a devcontainer domain, ensure dark theme
+--     local overrides = window:get_config_overrides() or {}
+--     if overrides.color_scheme ~= dark_theme then
+--       overrides.color_scheme = dark_theme
+--       overrides.colors = {
+--         background = ccolors.background,
+--       }
+--       window:set_config_overrides(overrides)
+--     end
+--   end
+-- end)
 
 return {
 	integrated_title_button_style = "Gnome",
