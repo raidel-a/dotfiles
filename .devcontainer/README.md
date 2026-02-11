@@ -1,6 +1,6 @@
 # Devcontainer Base Image
 
-Prebuilt base image for devcontainers with WezTerm multiplexing support.
+Prebuilt base image for devcontainers with WezTerm multiplexing support and full development workflow.
 
 Inspired by [Simon Ho's multiplexed devcontainer setup](https://www.simonho.ca/posts/multiplex-devcontainers).
 
@@ -49,20 +49,106 @@ make tags
 
 ## Using in Projects
 
+### Quick Start Templates
+
+Templates are available in `.devcontainer/templates/`:
+
+- `basic-devcontainer.json` - Minimal setup with workspace mounting
+- `nodejs-devcontainer.json` - Node.js with npm/yarn/pnpm support
+- `python-devcontainer.json` - Python with pip and virtual environment
+
+### Basic Setup (Recommended)
+
 In your project's `.devcontainer/devcontainer.json`:
 
 ```json
 {
   "name": "my-project",
   "image": "ghcr.io/raidel-a/devcontainer-base:latest",
+  
+  // Mount your project files
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  
+  // SSH server for WezTerm multiplexing
   "features": {
     "ghcr.io/devcontainers/features/sshd:1": {}
   },
-  "runArgs": ["-p", "2222:2222"]
+  
+  // SSH port mapping (CHANGE THIS for each project: 2222, 2223, 2224, etc.)
+  "runArgs": ["-p", "2222:2222"],
+  
+  // SSH agent forwarding
+  "mounts": [
+    "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind"
+  ],
+  
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/home/vscode/.ssh/ssh-agent"
+  },
+  
+  "remoteUser": "vscode"
 }
 ```
 
 **Important:** The `runArgs` with `-p 2222:2222` is required to expose the SSH port for WezTerm multiplexing to work.
+
+### Development Workflow
+
+With workspace mounting, your project files are:
+- **Live synced** between host and container
+- **Editable** from either host or container
+- **Persisted** on the host (not lost when container is deleted)
+
+Example:
+1. Edit `file.js` on your Mac with any editor
+2. Changes instantly appear in the container at `/workspace/file.js`
+3. Run tests/build inside the container
+4. All changes persist on your Mac
+
+### Language-Specific Optimizations
+
+#### Node.js Projects
+
+Use a named volume for `node_modules` to improve performance on Mac:
+
+```json
+{
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "mounts": [
+    "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind",
+    // Store node_modules in a volume (much faster than bind mount)
+    "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/node_modules,type=volume"
+  ],
+  "postCreateCommand": "npm install",
+  "forwardPorts": [3000, 5173, 8080]
+}
+```
+
+#### Python Projects
+
+```json
+{
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    }
+  },
+  "mounts": [
+    "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind",
+    // Cache pip packages
+    "source=${localWorkspaceFolderBasename}-pip-cache,target=/home/vscode/.cache/pip,type=volume"
+  ],
+  "postCreateCommand": "pip install -r requirements.txt",
+  "forwardPorts": [8000, 5000]
+}
+```
 
 ### Multiple Containers
 
@@ -91,8 +177,8 @@ Once the container is running, use the WezTerm multiplexing keybind (Cmd+P) to:
 3. Connect via **true WezTerm multiplexing** (not plain SSH)
 
 This provides significantly better performance than regular SSH - no redraw lag, smooth scrolling, and local terminal responsiveness.
-2. Select the container you want to connect to
-3. Connect seamlessly with full local WezTerm performance
+
+Each container opens in its own named workspace. When you exit from all tabs in a workspace, the window automatically closes.
 
 See the WezTerm config in `../wezterm/utils/devcontainer.lua` for implementation details.
 
@@ -118,11 +204,30 @@ This key is automatically added to containers' authorized_keys via the install.s
 
 ### For Each Project
 
-1. Create `.devcontainer/devcontainer.json` in your project (see example above)
-2. Start container: `devcontainer up --workspace-folder .`
-3. Press **Cmd+P** in WezTerm
-4. Select your container from the list
-5. Work with full Neovim performance inside the container
+1. Copy a template from `.devcontainer/templates/` to your project
+2. Customize the `name` and port number
+3. Start container: `devcontainer up --workspace-folder .`
+4. Press **Cmd+P** in WezTerm
+5. Select your container from the list
+6. Work with full Neovim performance inside the container
+7. Your files at `/workspace` are synced with your host project directory
+
+### Starting/Stopping Containers
+
+```bash
+# Start container
+cd ~/my-project
+devcontainer up --workspace-folder .
+
+# Stop container (files persist on host)
+docker stop <container-name>
+
+# Restart existing container
+docker start <container-name>
+
+# Rebuild container (e.g., after updating base image)
+devcontainer up --workspace-folder . --remove-existing-container
+```
 
 ### Updating the Base Image
 
@@ -134,7 +239,34 @@ make build
 make push
 ```
 
-Existing containers can pull updates automatically via the `postStartCommand`.
+Existing containers can pull dotfile updates automatically via the `postStartCommand`.
+
+## File Syncing Explained
+
+### What Gets Synced
+
+1. **Project files** (via workspace mount):
+   - Source: Your host project directory
+   - Target: `/workspace` in container
+   - Sync: Bidirectional, live (instant)
+   - Persists: On host, survives container deletion
+
+2. **Dotfiles** (via git clone on container creation):
+   - Source: Your dotfiles repo
+   - Target: `~/.config` in container  
+   - Sync: One-time on create, auto-pull on start
+   - Persists: In container only (reset on rebuild)
+
+3. **Dependencies** (optional volumes):
+   - `node_modules`, `.cache`, etc.
+   - Stored in Docker volumes for performance
+   - Persists: Across container restarts (not rebuilds)
+
+### Performance Tips
+
+- **Bind mounts** (project files): Good for source code, slower for dependencies
+- **Named volumes** (node_modules): Much faster for large dependency trees on Mac
+- **tmpfs**: Fastest, but data lost on container stop (rarely used)
 
 ## Notes
 
@@ -145,6 +277,7 @@ Existing containers can pull updates automatically via the `postStartCommand`.
 - The `runArgs` with `-p 2222:2222` is **required** for SSH port exposure
 - **WezTerm Multiplexing:** Connections use true WezTerm multiplexing (not plain SSH) for optimal performance
 - **Pre-allocated Domains:** SSH domains for ports 2222-2231 are pre-configured (10 concurrent containers max)
+- **Workspace Auto-close:** Empty workspace windows automatically close when you exit all tabs
 
 ## Troubleshooting
 
@@ -158,6 +291,11 @@ Existing containers can pull updates automatically via the `postStartCommand`.
 - Verify the public key is in the container: `docker exec <container-id> cat /home/vscode/.ssh/authorized_keys`
 - Test direct SSH: `ssh -p 2222 -i ~/.ssh/id_devcontainer vscode@127.0.0.1`
 
+### Files not appearing in /workspace
+- Check that `workspaceMount` is configured in devcontainer.json
+- Verify the mount: `docker inspect <container-id> | grep Mounts -A 20`
+- Ensure container was created after adding the mount (rebuild if needed)
+
 ### Multiple containers conflict
 Each container needs a unique host port, but the container's internal port is always 2222.
 
@@ -170,3 +308,14 @@ Each container needs a unique host port, but the container's internal port is al
   - Container 3: `"runArgs": ["-p", "2224:2222"]`
 
 The selector will automatically detect containers on any of these ports and connect using WezTerm multiplexing.
+
+### node_modules performance issues on Mac
+Use a named volume instead of bind mount:
+```json
+"mounts": [
+  "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/node_modules,type=volume"
+]
+```
+
+This stores node_modules in a Docker volume (Linux filesystem) instead of mounting from Mac (slower due to filesystem translation).
+

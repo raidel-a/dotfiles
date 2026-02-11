@@ -1,0 +1,45 @@
+{
+  "name": "PROJECT_NAME",
+  "image": "ghcr.io/raidel-a/devcontainer-base:latest",
+  
+  // Mount the project workspace
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  
+  // SSH server for WezTerm multiplexing
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  
+  // SSH port mapping (CHANGE THIS: 2222, 2223, 2224, etc.)
+  "runArgs": ["-p", "2222:2222"],
+  
+  // Mounts for SSH agent and performance optimization
+  "mounts": [
+    // SSH agent forwarding
+    "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind",
+    
+    // Use named volume for node_modules (massive performance boost on Mac)
+    "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/node_modules,type=volume"
+  ],
+  
+  // Environment variables
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/home/vscode/.ssh/ssh-agent",
+    "TZ": "America/Los_Angeles"
+  },
+  
+  // Install dependencies on container creation
+  "postCreateCommand": "npm install || yarn install || pnpm install || true",
+  "postStartCommand": "cd ~/.config && git pull --ff-only || true",
+  
+  // Forward common Node.js ports
+  "forwardPorts": [3000, 5173, 8080],
+  
+  "remoteUser": "vscode"
+}

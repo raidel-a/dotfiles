@@ -1,0 +1,37 @@
+{
+  "name": "PROJECT_NAME",
+  "image": "ghcr.io/raidel-a/devcontainer-base:latest",
+  
+  // Mount the project workspace
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  
+  // SSH server for WezTerm multiplexing
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
+  
+  // SSH port mapping (CHANGE THIS for each project: 2222, 2223, 2224, etc.)
+  "runArgs": ["-p", "2222:2222"],
+  
+  // Mounts for SSH agent
+  "mounts": [
+    // SSH agent forwarding
+    "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind"
+  ],
+  
+  // Environment variables
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/home/vscode/.ssh/ssh-agent",
+    "TZ": "America/Los_Angeles"
+  },
+  
+  // Commands to run on container lifecycle
+  "postCreateCommand": "echo 'Container created! Workspace mounted at /workspace'",
+  "postStartCommand": "cd ~/.config && git pull --ff-only || true",
+  
+  // Run as vscode user (non-root)
+  "remoteUser": "vscode"
+}
