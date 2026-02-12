@@ -120,9 +120,11 @@ With workspace mounting, your project files are:
 
 Example:
 1. Edit `file.js` on your Mac with any editor
-2. Changes instantly appear in the container at `/workspace/file.js`
+2. Changes instantly appear in the container at `/workspace/<project-name>/file.js`
 3. Run tests/build inside the container
 4. All changes persist on your Mac
+
+Note: The workspace is mounted at `/workspace/<project-name>` where `<project-name>` is your project directory name (e.g., `/workspace/urls` for a project in `~/Desktop/urls`).
 
 ### Language-Specific Optimizations
 
@@ -141,7 +143,7 @@ Use a named volume for `node_modules` to improve performance on Mac:
   "mounts": [
     "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind",
     // Store node_modules in a volume (much faster than bind mount)
-    "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/node_modules,type=volume"
+    "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/${localWorkspaceFolderBasename}/node_modules,type=volume"
   ],
   "postCreateCommand": "npm install",
   "forwardPorts": [3000, 5173, 8080]
@@ -223,12 +225,12 @@ This key is automatically added to containers' authorized_keys via the install.s
 ### For Each Project
 
 1. Copy a template from `.devcontainer/templates/` to your project
-2. Customize the `name` and port number
+2. Customize the `name` and port number (templates use directory name automatically)
 3. Start container: `devcontainer up --workspace-folder .`
 4. Press **Cmd+P** in WezTerm
 5. Select your container from the list
 6. Work with full Neovim performance inside the container
-7. Your files at `/workspace` are synced with your host project directory
+7. Your files at `/workspace/<project-name>` are synced with your host project directory
 
 ### Starting/Stopping Containers
 
@@ -265,7 +267,7 @@ Existing containers can pull dotfile updates automatically via the `postStartCom
 
 1. **Project files** (via workspace mount):
    - Source: Your host project directory
-   - Target: `/workspace` in container
+   - Target: `/workspace/<project-name>` in container (e.g., `/workspace/urls`)
    - Sync: Bidirectional, live (instant)
    - Persists: On host, survives container deletion
 
@@ -309,10 +311,11 @@ Existing containers can pull dotfile updates automatically via the `postStartCom
 - Verify the public key is in the container: `docker exec <container-id> cat /home/vscode/.ssh/authorized_keys`
 - Test direct SSH: `ssh -p 2222 -i ~/.ssh/id_devcontainer vscode@127.0.0.1`
 
-### Files not appearing in /workspace
+### Files not appearing in /workspace/<project-name>
 - Check that `workspaceMount` is configured in devcontainer.json
 - Verify the mount: `docker inspect <container-id> | grep Mounts -A 20`
 - Ensure container was created after adding the mount (rebuild if needed)
+- Check you're looking in the right path: `/workspace/<project-name>` not just `/workspace`
 
 ### Multiple containers conflict
 Each container needs a unique host port, but the container's internal port is always 2222.
@@ -331,7 +334,7 @@ The selector will automatically detect containers on any of these ports and conn
 Use a named volume instead of bind mount:
 ```json
 "mounts": [
-  "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/node_modules,type=volume"
+  "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/${localWorkspaceFolderBasename}/node_modules,type=volume"
 ]
 ```
 

@@ -1,8 +1,5 @@
 # Devcontainer Quick Start Guide
 
-## Setup Complete ✅
-
-Your devcontainer system is now fully configured with:
 - WezTerm multiplexing for fast container connections
 - Workspace mounting for full development workflow
 - Auto-syncing dotfiles
@@ -70,15 +67,9 @@ Your project files will be mounted at `/workspace` in the container.
 
 ### 3. Connect via WezTerm
 
-**Cmd+P**: Select and connect to a container
 1. Press **Cmd+P** in WezTerm
 2. Select your container from the fuzzy finder
 3. You're now inside the container with full terminal performance!
-
-**Cmd+9**: Switch between workspaces (when you have multiple containers)
-1. Press **Cmd+9** to see all active workspaces
-2. Select a workspace to switch to it
-3. Each container gets its own workspace (e.g., "my-project", "urls")
 
 All your dotfiles (nvim, zsh, etc.) are available inside the container.
 
@@ -86,8 +77,9 @@ All your dotfiles (nvim, zsh, etc.) are available inside the container.
 
 Inside the container:
 ```bash
-# Your files are at /workspace
-cd /workspace
+# Your files are at /workspace/<project-name>
+# e.g., for ~/urls project -> /workspace/urls
+cd /workspace/urls  # or whatever your project folder is named
 
 # Edit with nvim (your config is already there!)
 nvim myfile.js
@@ -235,7 +227,7 @@ devcontainer up --workspace-folder .
 # Press Cmd+P, select "my-app"
 
 # 5. Inside container:
-cd /workspace
+cd /workspace/my-app  # Automatically in your project directory
 npm install express
 nvim index.js  # Your nvim config works!
 node index.js
@@ -270,11 +262,3 @@ sudo chown -R vscode:vscode /workspace
 ### Slow performance (node_modules)
 Use volume mounts instead of bind mounts for dependencies (see templates).
 
-## Next Steps
-
-- Create your first real project using a template
-- Customize the base image if you need additional tools
-- Add more templates for other languages/frameworks
-- Check out `~/.config/.devcontainer/README.md` for advanced topics
-
-Happy containerized development! 🚀
