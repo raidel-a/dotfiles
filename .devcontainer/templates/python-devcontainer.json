@@ -3,8 +3,8 @@
   "image": "ghcr.io/raidel-a/devcontainer-base:latest",
   
   // Mount the project workspace
-  "workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
   
   // SSH server for WezTerm multiplexing
   "features": {

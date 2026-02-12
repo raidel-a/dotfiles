@@ -3,8 +3,8 @@
   "image": "ghcr.io/raidel-a/devcontainer-base:latest",
   
   // Mount the project workspace
-  "workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
   
   // SSH server for WezTerm multiplexing
   "features": {
@@ -25,7 +25,7 @@
     "source=${localEnv:SSH_AUTH_SOCK},target=/home/vscode/.ssh/ssh-agent,type=bind",
     
     // Use named volume for node_modules (massive performance boost on Mac)
-    "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/${localWorkspaceFolderBasename}/node_modules,type=volume"
+    "source=${localWorkspaceFolderBasename}-node_modules,target=/${localWorkspaceFolderBasename}/node_modules,type=volume"
   ],
   
   // Environment variables

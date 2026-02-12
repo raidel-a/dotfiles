@@ -170,7 +170,7 @@ M.show_domain_selector = function()
               name = container.display_name,
               spawn = {
                 domain = { DomainName = container.domain_name },
-                cwd = "/workspace/" .. container.display_name,
+                cwd = "/" .. container.display_name,
               },
             }),
             pane

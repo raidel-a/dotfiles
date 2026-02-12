@@ -63,7 +63,7 @@ cd ~/my-new-project
 devcontainer up --workspace-folder .
 ```
 
-Your project files will be mounted at `/workspace` in the container.
+Your project files will be mounted at `/<project-name>` in the container.
 
 ### 3. Connect via WezTerm
 
@@ -77,9 +77,9 @@ All your dotfiles (nvim, zsh, etc.) are available inside the container.
 
 Inside the container:
 ```bash
-# Your files are at /workspace/<project-name>
-# e.g., for ~/urls project -> /workspace/urls
-cd /workspace/urls  # or whatever your project folder is named
+# Your files are at /<project-name>
+# e.g., for ~/urls project -> /urls
+cd /urls  # or whatever your project folder is named
 
 # Edit with nvim (your config is already there!)
 nvim myfile.js
@@ -153,7 +153,7 @@ Cmd+P will show all running containers!
 ## File Syncing Behavior
 
 ### What's Mounted
-- **Project files**: `/workspace` → your project directory
+- **Project files**: `/<project-name>` → your project directory
   - Bidirectional, instant sync
   - Editable from host or container
   - Survives container deletion
@@ -227,7 +227,7 @@ devcontainer up --workspace-folder .
 # Press Cmd+P, select "my-app"
 
 # 5. Inside container:
-cd /workspace/my-app  # Automatically in your project directory
+cd /my-app  # Automatically in your project directory
 npm install express
 nvim index.js  # Your nvim config works!
 node index.js
