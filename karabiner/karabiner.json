@@ -146,16 +146,16 @@
                     },
                     "simple_modifications": [
                         {
+                            "from": { "apple_vendor_top_case_key_code": "keyboard_fn" },
+                            "to": [{ "key_code": "left_control" }]
+                        },
+                        {
                             "from": { "key_code": "caps_lock" },
                             "to": [{ "key_code": "escape" }]
                         },
                         {
                             "from": { "key_code": "escape" },
                             "to": [{ "key_code": "caps_lock" }]
-                        },
-                        {
-                            "from": { "apple_vendor_top_case_key_code": "keyboard_fn" },
-                            "to": [{ "key_code": "left_control" }]
                         },
                         {
                             "from": { "key_code": "left_control" },
@@ -277,6 +277,34 @@
                         {
                             "from": { "key_code": "9" },
                             "to": [{ "key_code": "volume_increment" }]
+                        }
+                    ]
+                },
+                {
+                    "identifiers": {
+                        "product_id": 641,
+                        "vendor_id": 1452
+                    },
+                    "simple_modifications": [
+                        {
+                            "from": { "apple_vendor_top_case_key_code": "keyboard_fn" },
+                            "to": [{ "key_code": "left_control" }]
+                        },
+                        {
+                            "from": { "key_code": "caps_lock" },
+                            "to": [{ "key_code": "escape" }]
+                        },
+                        {
+                            "from": { "key_code": "escape" },
+                            "to": [{ "key_code": "caps_lock" }]
+                        },
+                        {
+                            "from": { "key_code": "left_control" },
+                            "to": [{ "key_code": "left_option" }]
+                        },
+                        {
+                            "from": { "key_code": "left_option" },
+                            "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
                         }
                     ]
                 }

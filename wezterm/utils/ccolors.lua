@@ -2,9 +2,10 @@ local ccolors = {}
 
 ccolors.transparent = "rgba(0,0,0,0.0)"
 ccolors.semi_transparent = "rgba(10,10,10,1)"
-ccolors.background = "#141414"
+-- ccolors.background = "#141414"
+ccolors.background = "#011005"
 ccolors.light_background = "#EEE8D5"
-ccolors.border = "#222222"
+ccolors.border = "#191919"
 ccolors.fg = "#F0ECE1"
 ccolors.fg_inactive = "#505050"
 ccolors.fg_statusbar = "#bebebe"
