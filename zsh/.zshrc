@@ -11,9 +11,7 @@ for conf in "$ZDOTDIR/conf.d/"*.zsh; do
     source "$conf"
 done
 
-# opencode
-export PATH=/Users/rai/.opencode/bin:$PATH
-#compdef opencode
+# opencode\nexport GIT_CONFIG_GLOBAL=\"$HOME/.config/git/config\"\nexport PATH=/Users/rai/.opencode/bin:$PATH\n#compdef opencode
 ###-begin-opencode-completions-###
 #
 # yargs command completion script

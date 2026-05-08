@@ -24,3 +24,7 @@ brew "ripgrep"
 brew "fd"
 brew "direnv"
 brew "gh"
+
+brew "bun"
+brew "tailscale"
+brew "zoxide"
