@@ -146,24 +146,12 @@
                     },
                     "simple_modifications": [
                         {
-                            "from": { "apple_vendor_top_case_key_code": "keyboard_fn" },
-                            "to": [{ "key_code": "left_control" }]
-                        },
-                        {
                             "from": { "key_code": "caps_lock" },
                             "to": [{ "key_code": "escape" }]
                         },
                         {
                             "from": { "key_code": "escape" },
                             "to": [{ "key_code": "caps_lock" }]
-                        },
-                        {
-                            "from": { "key_code": "left_control" },
-                            "to": [{ "key_code": "left_option" }]
-                        },
-                        {
-                            "from": { "key_code": "left_option" },
-                            "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
                         }
                     ]
                 },
@@ -307,28 +295,33 @@
                             "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
                         }
                     ]
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 45061,
+                        "vendor_id": 22634
+                    },
+                    "simple_modifications": [
+                        {
+                            "from": { "key_code": "f24" },
+                            "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
+                        }
+                    ]
                 }
             ],
             "fn_function_keys": [
                 {
-                    "from": { "key_code": "f3" },
-                    "to": [{ "key_code": "f3" }]
-                },
-                {
                     "from": { "key_code": "f4" },
-                    "to": [{ "key_code": "f4" }]
-                },
-                {
-                    "from": { "key_code": "f5" },
-                    "to": [{ "consumer_key_code": "al_consumer_control_configuration" }]
-                },
-                {
-                    "from": { "key_code": "f6" },
-                    "to": [{ "pointing_button": "button2" }]
+                    "to": [{ "key_code": "f20" }]
                 }
             ],
             "name": "Default profile",
             "selected": true,
+            "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+        },
+        {
+            "name": "New profile",
             "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
         }
     ]
