@@ -16,9 +16,9 @@ M.override = {
 
 	TbFill = { bg = tertiary, fg = secondary },
 
-	TbBufOn = { bg = NONE, fg = white },
-	TbBufOnClose = { bg = NONE, bold = true },
-	TbBufOnModified = { bg = none },
+	TbBufOn = { bg = "NONE", fg = "white" },
+	TbBufOnClose = { bg = "NONE", bold = true },
+	TbBufOnModified = { bg = "NONE" },
 	-- TbBufOnTransparent xxx cterm=bold gui=bold guifg=#d9e0ee
 
 	TbBufOff = { bg = tertiary, italic = true, underline = false },
@@ -28,31 +28,23 @@ M.override = {
 	WinSeparator = { fg = tertiary },
 	NvimTreeOpenedFolderName = { bold = true, underline = true },
 	NvimTreeWinSeparator = { fg = tertiary },
-	-- NvimTreeCursor = { blend = 0 },
-	-- NvimTreeCursorLine = {
-	-- 	bg = "#2d3149",
-	-- 	bold = true,
-	-- 	italic = true,
-	--    underdashed = true
-	-- },
+	-- defined by base46's `nvimtree` integration; we only add styling
+	NvimTreeCursorLine = { bold = true, underline = true },
 }
 
 ---@type HLTable
 M.add = {
-	-- Base highlights
-	GitSignsAdd = { link = "DiffAdd" },
-	GitSignsChange = { link = "DiffChange" },
-	GitSignsDelete = { link = "DiffDelete" },
+	-- NvimTreeCursorLineNC + the sidebar dimming in autocmds.lua are not part of
+	-- base46's nvimtree integration, so they are added here instead of via autocmd.
+	NvimTreeCursorLineNC = { underdashed = true },
 
-	-- Line highlights
-	GitSignsAddLn = { link = "DiffAdd" },
+	-- Cursor-hide target for the NvimTree window (see autocmds.lua). blend=100
+	-- renders the cursor transparent, leaving only the line highlight.
+	NvimTreeHiddenCursor = { blend = 100, nocombine = true },
+
+	-- The GitSigns* base/Nr/Ln groups come from base46's `gitsigns` integration
+	-- (opt-in, see chadrc). Only the groups it doesn't define are kept here.
 	GitSignsChangeLn = { link = "DiffChange" },
-	GitSignsDeleteLn = { link = "DiffDelete" },
-
-	-- Number highlights
-	GitSignsAddNr = { link = "DiffAdd" },
-	GitSignsChangeNr = { link = "DiffChange" },
-	GitSignsDeleteNr = { link = "DiffDelete" },
 
 	-- Composite types
 	GitSignsChangedelete = { link = "GitSignsChange" },

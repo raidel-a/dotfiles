@@ -19,27 +19,26 @@ map(
 
 map("n", "<Leader>s", ":ClangdSwitchSourceHeader<CR>", { desc = "Switch between header and source file" })
 
--- Telescope
--- map("n", "<C-p>", "<cmd>Telescope git_files<CR>", { desc = "Find files in version control" })
--- map("n", "<Leader>pf", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
--- map(
--- 	"n",
--- 	"<Leader>pfa",
--- 	"<cmd>Telescope find_files follow=true no_ignore=true hidden=true<CR>",
--- 	{ desc = "Find all files" }
--- )
--- map("n", "<Leader>pg", "<cmd>Telescope live_grep<CR>", { desc = "Grep files" })
--- map("n", "<Leader>pb", "<cmd>Telescope buffers<CR>", { desc = "Find buffers" })
--- map("n", "<Leader>ph", "<cmd>Telescope help_tags<CR>", { desc = "Help page" })
--- map("n", "<Leader>po", "<cmd>Telescope oldfiles<CR>", { desc = "Find oldfiles" })
+-- Telescope pickers (NvChad also maps ff/fa/fw/fb/fh/fo/fz/cm/gt by default;
+-- re-declared here so the intent is visible).
+map("n", "<Leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
+map("n", "<Leader>fw", "<cmd>Telescope live_grep<CR>", { desc = "Live grep" })
+map("n", "<Leader>fb", "<cmd>Telescope buffers<CR>", { desc = "Find buffers" })
+map("n", "<Leader>fh", "<cmd>Telescope help_tags<CR>", { desc = "Help page" })
+map("n", "<Leader>fo", "<cmd>Telescope oldfiles<CR>", { desc = "Find oldfiles" })
+map("n", "<Leader>fz", "<cmd>Telescope current_buffer_fuzzy_find<CR>", { desc = "Find in current buffer" })
+map({ "n", "x" }, "<Leader>fc", "<cmd>Telescope grep_string<CR>", { desc = "Grep word/selection" })
 map("n", "<Leader>pk", "<cmd>Telescope keymaps<CR>", { desc = "Show keymaps" })
+map("n", "<Leader>fa", "<cmd>Telescope find_files follow=true no_ignore=true hidden=true<CR>", {
+	desc = "Telescope: find all files (incl. gitignored)",
+})
 
 -- Nvim DAP
 map("n", "<Leader>dl", "<cmd>lua require'dap'.step_into()<CR>", { desc = "Debugger step into" })
 map("n", "<Leader>dj", "<cmd>lua require'dap'.step_over()<CR>", { desc = "Debugger step over" })
 map("n", "<Leader>dk", "<cmd>lua require'dap'.step_out()<CR>", { desc = "Debugger step out" })
-map("n", "<Leader>d<space>", "<cmd>lua require'dap'.continue()<CR>", { desc = "Debugger continue" })
-map("n", "<Leader>d<space>", "<cmd>lua require'dap'.toggle_breakpoint()<CR>", { desc = "Debugger toggle breakpoint" })
+map("n", "<Leader>dc", "<cmd>lua require'dap'.continue()<CR>", { desc = "Debugger continue" })
+map("n", "<Leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<CR>", { desc = "Debugger toggle breakpoint" })
 map(
 	"n",
 	"<Leader>dd",
@@ -55,38 +54,40 @@ map({ "n", "t" }, "<C-\\>", function()
 end, { desc = "Terminal Toggle Floating term" })
 
 -- File tree
--- Center floating nvim-tree
-map("n", "<Leader>e", function()
-	local api = require("nvim-tree.api")
-	local view = require("nvim-tree.view")
-	local overrides = require("configs.overrides")
+-- nvim-tree must be `setup()` once per view variant. Re-running setup on every
+-- toggle would re-register autocmds and reset the tree, so only switch views
+-- when needed and otherwise just open/close.
+local tree_view = "side"
 
-	-- If open, just close it
-	if view.is_visible() then
+local function toggle_tree()
+	local api = require("nvim-tree.api")
+
+	if require("nvim-tree.view").is_visible() then
 		api.tree.close()
 		return
 	end
 
-	-- Configure for center floating and open
-	require("nvim-tree").setup(overrides.nvimtree_center)
 	api.tree.open()
+end
+
+-- Center floating nvim-tree
+map("n", "<Leader>e", function()
+	local ov = require("configs.overrides")
+	if not require("nvim-tree.view").is_visible() and tree_view ~= "float" then
+		require("nvim-tree").setup(ov.extend("nvchad.configs.nvimtree", ov.nvimtree_center))
+		tree_view = "float"
+	end
+	toggle_tree()
 end, { desc = "Toggle nvim-tree (center floating)" })
 
 -- Right side nvim-tree
 map("n", "<C-n>", function()
-	local api = require("nvim-tree.api")
-	local view = require("nvim-tree.view")
-	local overrides = require("configs.overrides")
-
-	-- If open, just close it
-	if view.is_visible() then
-		api.tree.close()
-		return
+	local ov = require("configs.overrides")
+	if not require("nvim-tree.view").is_visible() and tree_view ~= "side" then
+		require("nvim-tree").setup(ov.extend("nvchad.configs.nvimtree", ov.nvimtree))
+		tree_view = "side"
 	end
-
-	-- Configure for right side and open
-	require("nvim-tree").setup(overrides.nvimtree)
-	api.tree.open()
+	toggle_tree()
 end, { desc = "Toggle nvim-tree (right side)" })
 
 -- LSP config
@@ -98,16 +99,8 @@ map(
 )
 map("n", "<Leader>dF", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "Go to previous diagnostic" })
 map("n", "<Leader>df", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "Go to next diagnostic" })
-map("n", "<Leader>dt", "<cmd>Telescope diagnostics<CR>", { desc = "Telescope diagnostics" })
+map("n", "<Leader>dt", "<cmd>Trouble diagnostics toggle<CR>", { desc = "Trouble diagnostics" })
 map("n", "<Leader>da", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "Lsp code action" })
-
--- Null-ls
-map(
-    "n",
-    "<C-f>",
-    "<cmd>lua require('configs.lsp.null-ls').lsp_formatting(vim.api.nvim_get_current_buf())<CR>",
-    { desc = "Format current file using null-ls" }
-)
 
 -- Buffer delete
 -- map("n", "<Leader>q", "<cmd>BufDel<CR>", { desc = "Close buffer" })
@@ -122,8 +115,7 @@ map("n", "H", function()
 	require("nvchad.tabufline").prev()
 end, { desc = "Go to previous buffer" })
 
--- Plenary
-map("n", "<Leader>tp", "<Plug>PlenaryTestFile", { desc = "Run plenary test on file" })
+-- Tests: use neotest (see the keys in lua/plugins/init.lua)
 
 -- Toggles
 map("n", "<leader>tT", function()
@@ -147,7 +139,9 @@ end, { desc = "Toggle Theme" })
 
 -- map("i", "<Esc>", "<CapsLock>", { noremap = true, silent = true, desc = "Remap Escape to Caps Lock" })
 
-map({ "n", "v" }, "<leader>st", require("stay-centered").toggle, { desc = "Toggle stay-centered.nvim" })
+map({ "n", "v" }, "<leader>st", function()
+	require("stay-centered").toggle()
+end, { desc = "Toggle stay-centered.nvim" })
 
 -- horizontal resize split with control + shift + h
 map("n", "<C-S-h>", "<C-w><", { desc = "Decrease horizontal split size" })

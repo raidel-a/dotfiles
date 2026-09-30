@@ -13,49 +13,56 @@ M.treesitter = {
 	},
 }
 
+-- LSP servers to install, using lspconfig server names.
+-- This is the single source of truth: configs/lsp/init.lua enables this same list.
+M.mason_lsp_servers = {
+	"lua_ls", -- Lua
+	"cssls", -- CSS
+	"html", -- HTML
+	"ts_ls", -- TypeScript / JavaScript
+	"clangd", -- C / C++
+	"gopls", -- Go
+	"rust_analyzer", -- Rust
+	"zls", -- Zig
+	"jdtls", -- Java
+	"tailwindcss",
+}
+
+-- Formatters, linters and debug adapters to install, using mason package names.
+-- mason.nvim dropped its own `ensure_installed` option, so these are installed
+-- by mason-tool-installer.nvim instead.
+M.mason_tools = {
+	-- lua
+	"stylua",
+	-- web
+	"prettier",
+	-- C / C++
+	"clang-format",
+	"cpplint",
+	-- python
+	"black",
+	"pylint",
+	-- shell
+	"shellcheck",
+	"shellharden",
+	-- go
+	"gofumpt",
+	"goimports",
+	"golangci-lint",
+	"delve",
+	"go-debug-adapter",
+	-- java
+	"google-java-format",
+	-- debug adapters
+	"bash-debug-adapter",
+	"cpptools",
+	"netcoredbg",
+}
+
 M.mason = {
-	ensure_installed = {
-		-- lua stuff
-		"lua-language-server",
-		"stylua",
-
-		-- web dev
-		"css-lsp",
-		"html-lsp",
-		"typescript-language-server",
-		"deno",
-    "tailwindcss",
-
-		-- C/C++
-		"clangd",
-		"clang-format",
-		"cmake-language-server",
-		"cpplint",
-		"cpptools",
-
-		-- shell
-		"shellcheck",
-		"shellharden",
-		"bash-language-server",
-		"bash-debug-adapter",
-		"awk-language-server",
-
-		-- python
-		"pyright",
-		"pylint",
-
-		-- go
-		"delve",
-		"go-debug-adapter",
-		"gofumpt",
-		"goimports",
-		"goimports-reviser",
-		"golangci-lint",
-		"golangci-lint-langserver",
-		"golines",
-		"gomodifytags",
-		"gopls",
-	},
+	ui = { border = "rounded" },
+	PATH = "prepend",
+	max_concurrent_installers = 10,
 }
 
 -- git support in nvimtree
@@ -151,23 +158,6 @@ M.gitsigns = {
 	status_formatter = nil,
 }
 
-M.cmp = {
-	formatting = {
-		format = function(entry, vim_item)
-			local icons = require("nvchad.icons.lspkind")
-			vim_item.kind = string.format("%s %s", icons[vim_item.kind], vim_item.kind)
-			vim_item.menu = ({
-				luasnip = "[Luasnip]",
-				nvim_lsp = "[Nvim LSP]",
-				buffer = "[Buffer]",
-				nvim_lua = "[Nvim Lua]",
-				path = "[Path]",
-			})[entry.source.name]
-			return vim_item
-		end,
-	},
-}
-
 M.telescope = {
 	style = "bordered",
 	defaults = {
@@ -192,22 +182,43 @@ M.telescope = {
 	},
 }
 
--- Setup nvim-tree resize autocmd
-local api = require("nvim-tree.api")
+-- Called from the nvim-tree plugin config. Kept out of module scope because
+-- requiring nvim-tree.api while this module is first imported (from the plugin
+-- specs) would force nvim-tree to load at startup.
+function M.setup_nvimtree_autocmds()
+	local api = require("nvim-tree.api")
 
-vim.api.nvim_create_augroup("NvimTreeResize", {
-	clear = true,
-})
+	vim.api.nvim_create_augroup("NvimTreeResize", {
+		clear = true,
+	})
 
-vim.api.nvim_create_autocmd({ "VimResized", "WinResized" }, {
-	group = "NvimTreeResize",
-	callback = function()
-		-- Get the nvim-tree window ID
-		local winid = api.tree.winid()
-		if winid then
-			api.tree.reload()
-		end
-	end,
-})
+	vim.api.nvim_create_autocmd({ "VimResized", "WinResized" }, {
+		group = "NvimTreeResize",
+		callback = function()
+			-- Get the nvim-tree window ID
+			if api.tree.winid() then
+				api.tree.reload()
+			end
+		end,
+	})
+end
+
+-- Merge our overrides on top of an NvChad default config.
+-- The `nvchad.configs.*` modules also dofile their base46 highlight cache at
+-- require time, so calling them matters even when we replace most of the table.
+function M.extend(nvchad_config, our_opts)
+	return vim.tbl_deep_extend("force", require(nvchad_config), our_opts or {})
+end
+
+-- Load a base46 integration cache for a plugin NvChad doesn't manage (dap,
+-- diffview, git-conflict, gitsigns, ...). These integrations aren't compiled by
+-- default, and base46 only (re)compiles them on a rebuild (`:Lazy build base46`)
+-- or a theme toggle, so guard the dofile instead of erroring on startup.
+function M.load_base46_cache(name)
+	local path = vim.g.base46_cache .. name
+	if vim.uv.fs_stat(path) then
+		dofile(path)
+	end
+end
 
 return M

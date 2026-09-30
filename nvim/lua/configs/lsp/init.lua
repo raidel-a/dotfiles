@@ -1,27 +1,25 @@
-local merge_tb = vim.tbl_deep_extend
+-- Neovim 0.11+ LSP setup: per-server config via vim.lsp.config, then enable.
+-- require("nvchad.configs.lspconfig").defaults() (called before this module)
+-- already registers the "*" defaults (capabilities, on_init) and the LspAttach
+-- keymaps.
+local overrides = require("configs.overrides")
+local servers = overrides.mason_lsp_servers
 
-local configs = require("nvchad.configs.lspconfig")
-local on_init = configs.on_init
-local on_attach = configs.on_attach
-local capabilities = configs.capabilities
+for _, server in ipairs(servers) do
+	local exists, settings = pcall(require, "configs.lsp.server-settings." .. server)
 
-local lspconfig = require("lspconfig")
-local servers = { "html", "cssls", "ts_ls", "clangd", "gopls", "lua_ls", "rust_analyzer", "zls", "jdtls" }
-
-for _, lsp in ipairs(servers) do
-	local opts = {
-		on_init = on_init,
-		on_attach = on_attach,
-		capabilities = capabilities,
-	}
-
-	local exists, settings = pcall(require, "configs.lsp.server-settings." .. lsp)
-	if exists then
-		opts = merge_tb("force", settings, opts)
-	end
-
-	lspconfig[lsp].setup(opts)
+	vim.lsp.config(server, exists and settings or {})
 end
+
+-- NvChad's "*" defaults deliberately disable semantic tokens, because by default
+-- vim.hl.priorities.semantic_tokens (125) outranks treesitter (100) and would
+-- take over. Re-enable them, but drop them below treesitter so treesitter stays
+-- authoritative and semantic tokens only fill in what it doesn't cover.
+overrides.load_base46_cache "semantic_tokens"
+vim.hl.priorities.semantic_tokens = 75
+vim.lsp.config("*", { on_init = function() end })
+
+vim.lsp.enable(servers)
 
 local config = {
 	virtual_text = false,

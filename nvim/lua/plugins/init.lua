@@ -1,22 +1,14 @@
 local overrides = require("configs.overrides")
 
 return {
-	-- {
-	-- 	"neovim/nvim-lspconfig",
-	-- 	dependencies = {
-	-- 		-- format & linting
-	-- 		{
-	-- 			"jose-elias-alvarez/null-ls.nvim",
-	-- 			config = function()
-	-- 				require("configs.lsp.null-ls")
-	-- 			end,
-	-- 		},
-	-- 	},
-	-- 	config = function()
-	-- 		require("nvchad.configs.lspconfig").defaults() -- nvchad defaults for lua
-	-- 		require("configs.lsp")
-	-- 	end, -- Override to setup mason-lspconfig
-	-- },
+	-- base46 must match ui: ui v3.0's blink config unconditionally dofiles a
+	-- `blink` cache, and only base46 v3.0 has a blink integration to produce one.
+	-- NvChad doesn't pin this and lazy keeps the branch recorded in the lockfile,
+	-- so pin it explicitly to stop it drifting again.
+	{
+		"nvchad/base46",
+		branch = "v3.0",
+	},
 
 	{
 		"neovim/nvim-lspconfig",
@@ -40,10 +32,13 @@ return {
 							c = { "clang_format" },
 							java = { "google-java-format" },
 						},
-						format_on_save = {
-							timeout_ms = 500,
-							lsp_fallback = true,
-						},
+						-- format on save, but skip huge buffers so saving never blocks
+						format_on_save = function(bufnr)
+							if vim.api.nvim_buf_line_count(bufnr) > 2000 then
+								return
+							end
+							return { timeout_ms = 500, lsp_fallback = true }
+						end,
 					})
 				end,
 			},
@@ -57,83 +52,231 @@ return {
 	-- override plugin configs
 	{
 		"williamboman/mason.nvim",
-		cmd = "Mason",
-		event = "BufReadPre",
-		opts = overrides.mason,
-		config = function()
-			require("mason").setup({
-				ui = { border = "rounded" },
-				PATH = "prepend",
-				max_concurrent_installers = 10,
-			})
+		cmd = { "Mason", "MasonInstall", "MasonUninstall", "MasonUpdate", "MasonLog" },
+		opts = function()
+			return overrides.extend("nvchad.configs.mason", overrides.mason)
 		end,
 	},
 
 	{
 		"williamboman/mason-lspconfig.nvim",
-		lazy = false,
-		config = function()
-			local mason_lspconfig = require("mason-lspconfig")
-
-			mason_lspconfig.setup({
-				ensure_installed = {
-					"lua_ls", -- Lua
-					"cssls", -- CSS
-					"html", -- HTML
-					"ts_ls", -- TypeScript/JavaScript
-					"clangd", -- C/C++
-					"gopls", -- Go
-					"rust_analyzer", -- Rust
-					"tailwindcss",
-					"jdtls", -- Java
-				},
-				automatic_installation = true,
-			})
-		end,
+		dependencies = { "williamboman/mason.nvim" },
+		event = "User FilePost",
+		opts = {
+			ensure_installed = overrides.mason_lsp_servers,
+			-- servers are set up manually in configs/lsp/init.lua
+			automatic_enable = false,
+		},
 	},
 
+	-- mason's own `ensure_installed` no longer exists; tools (formatters, linters,
+	-- debug adapters) are installed by mason-tool-installer instead.
 	{
-		"nvim-treesitter/nvim-treesitter",
-		opts = overrides.treesitter,
-	},
-
-	{
-		"nvim-tree/nvim-tree.lua",
-		opts = overrides.nvimtree,
-	},
-
-	{
-		"nvim-telescope/telescope.nvim",
-		opts = overrides.telescope,
-	},
-
-	-- add telescope-fzf-native
-	{
-		"telescope.nvim",
-		dependencies = {
-			"nvim-telescope/telescope-fzf-native.nvim",
-			build = "make",
-			lazy = false,
-			config = function()
-				require("telescope").load_extension("fzf")
-			end,
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		dependencies = { "williamboman/mason.nvim" },
+		event = "VeryLazy",
+		opts = {
+			ensure_installed = overrides.mason_tools,
+			auto_update = false,
+			run_on_start = true,
 		},
 	},
 
 	{
-		"lewis6991/gitsigns.nvim",
+		"nvim-treesitter/nvim-treesitter",
+		-- Nvim 0.12 needs the rewritten `main` branch. The old `master` branch
+		-- is archived, only supports Nvim <= 0.11, and crashes when its query
+		-- predicates/directives run. `main` is also what NvChad v2.5 expects:
+		-- it highlights via native vim.treesitter.start() and installs parsers
+		-- with require("nvim-treesitter").install() (its TSInstallAll command).
+		-- main doesn't support lazy-loading, so load it eagerly.
+		branch = "main",
 		lazy = false,
-		opts = overrides.gitsigns,
+		opts = function()
+			return overrides.extend("nvchad.configs.treesitter", overrides.treesitter)
+		end,
 	},
 
-	-- {
-	-- 	"hrsh7th/nvim-cmp",
-	-- 	opts = overrides.cmp,
-	-- },
+	{
+		"nvim-tree/nvim-tree.lua",
+		opts = function()
+			return overrides.extend("nvchad.configs.nvimtree", overrides.nvimtree)
+		end,
+		config = function(_, opts)
+			require("nvim-tree").setup(opts)
+			overrides.setup_nvimtree_autocmds()
+		end,
+	},
+
+	-- Telescope is the picker (NvChad defaults provide ff/fw/fb/fh/fo/fz/cm/gt).
+	{
+		"nvim-telescope/telescope.nvim",
+		dependencies = {
+			{
+				"nvim-telescope/telescope-fzf-native.nvim",
+				build = "make",
+			},
+		},
+		opts = function()
+			return overrides.extend("nvchad.configs.telescope", overrides.telescope)
+		end,
+		config = function(_, opts)
+			require("telescope").setup(opts)
+			require("telescope").load_extension("fzf")
+		end,
+	},
+
+	{
+		"lewis6991/gitsigns.nvim",
+		event = { "BufReadPre", "BufNewFile" },
+		opts = function()
+			return overrides.extend("nvchad.configs.gitsigns", overrides.gitsigns)
+		end,
+		config = function(_, opts)
+			overrides.load_base46_cache "gitsigns"
+			require("gitsigns").setup(opts)
+		end,
+	},
 
 	{ import = "nvchad.blink.lazyspec" },
 
-	{ "Saghen/blink.cmp", opts = {} },
+	-- Tier 2. Declared after the lazyspec import so these take precedence.
+
+	-- nvim-autopairs is replaced by blink.pairs (auto-pairs + rainbow delimiters)
+	{
+		"windwp/nvim-autopairs",
+		enabled = false,
+	},
+
+	{
+		"saghen/blink.pairs",
+		version = "*",
+		dependencies = "saghen/blink.lib",
+		-- must load before better-escape (InsertEnter) so its <Space> mapping
+		-- does not swallow the <space><tab> luasnip sequence
+		event = { "BufReadPre", "BufNewFile" },
+		-- prebuilt binary; if the download ever fails, swap for
+		-- require("blink.pairs").build():pwait(60000) to compile from source
+		build = function()
+			require("blink.pairs").download():pwait(60000)
+		end,
+		opts = {},
+		config = function(_, opts)
+			overrides.load_base46_cache "blink-pair"
+			require("blink.pairs").setup(opts)
+		end,
+	},
+
+	-- diagnostics: inline messages + a proper panel
+	{
+		"rachartier/tiny-inline-diagnostic.nvim",
+		event = "VeryLazy",
+		priority = 1000, -- must load after the LSP diagnostic config
+		opts = { preset = "modern" },
+		config = function(_, opts)
+			overrides.load_base46_cache "tiny-inline-diagnostic"
+			require("tiny-inline-diagnostic").setup(opts)
+		end,
+	},
+
+	{
+		"folke/trouble.nvim",
+		cmd = "Trouble",
+		opts = {},
+		config = function(_, opts)
+			overrides.load_base46_cache "trouble"
+			require("trouble").setup(opts)
+		end,
+	},
+
+	-- motions
+	{
+		"folke/flash.nvim",
+		opts = {},
+		keys = {
+			{ "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+			-- normal-mode S is deliberately left alone
+			{ "S", mode = { "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+			{ "<C-s>", mode = "c", function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+		},
+		config = function(_, opts)
+			overrides.load_base46_cache "flash"
+			require("flash").setup(opts)
+		end,
+	},
+
+	-- tests (replaces the PlenaryTestFile mapping)
+	{
+		"nvim-neotest/neotest",
+		dependencies = {
+			"nvim-neotest/nvim-nio",
+			"nvim-lua/plenary.nvim",
+			"nvim-neotest/neotest-plenary",
+		},
+		opts = {},
+		keys = {
+			{ "<Leader>tn", function() require("neotest").run.run() end, desc = "Neotest: run nearest" },
+			{ "<Leader>tf", function() require("neotest").run.run(vim.fn.expand "%") end, desc = "Neotest: run file" },
+			{ "<Leader>ts", function() require("neotest").summary.toggle() end, desc = "Neotest: toggle summary" },
+			{ "<Leader>to", function() require("neotest").output.open { enter = true } end, desc = "Neotest: show output" },
+		},
+		config = function(_, opts)
+			opts.adapters = { require "neotest-plenary" }
+			overrides.load_base46_cache "neotest"
+			require("neotest").setup(opts)
+		end,
+	},
+
+	-- markdown rendering (vimwiki is intentionally left in place)
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		ft = "markdown",
+		dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+		opts = {},
+		config = function(_, opts)
+			overrides.load_base46_cache "render-markdown"
+			require("render-markdown").setup(opts)
+		end,
+	},
+
+	-- native git UI
+	{
+		"NeogitOrg/neogit",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"sindrets/diffview.nvim",
+			"nvim-telescope/telescope.nvim",
+		},
+		keys = { { "<Leader>gn", "<cmd>Neogit<CR>", desc = "Neogit" } },
+		opts = { integrations = { diffview = true, telescope = true } },
+		config = function(_, opts)
+			overrides.load_base46_cache "neogit"
+			require("neogit").setup(opts)
+		end,
+	},
+
+	-- LSP UI. Deliberately installed without keymaps so nothing silently
+	-- overrides the built-in NvChad LSP mappings; everything is reachable via
+	-- the :Lspsaga* commands, and we can wire keys once you pick them.
+	-- lightbulb/beacon are also off by default: lspsaga would otherwise add a
+	-- code-action sign + virtual text (which collides with tiny-inline-diagnostic)
+	-- and flash a beacon on every jump. Flip them on when you want them.
+	{
+		"nvimdev/lspsaga.nvim",
+		event = "LspAttach",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons",
+		},
+		opts = {
+			lightbulb = { enable = false },
+			beacon = { enable = false },
+		},
+		config = function(_, opts)
+			overrides.load_base46_cache "lspsaga"
+			require("lspsaga").setup(opts)
+		end,
+	},
 
 	-- Additional plugins
 
@@ -146,30 +289,26 @@ return {
 		end,
 	},
 
+	-- debugging
 	{
 		"mfussenegger/nvim-dap",
+		event = "VeryLazy",
+		dependencies = {
+			{
+				"rcarriga/nvim-dap-ui",
+				dependencies = { "nvim-neotest/nvim-nio" },
+				opts = {},
+			},
+			{
+				"theHamsta/nvim-dap-virtual-text",
+				opts = {},
+			},
+		},
 		config = function()
+			overrides.load_base46_cache "dap"
 			require("configs.dap")
 		end,
 	},
-
-	{
-		"rcarriga/nvim-dap-ui",
-		config = function()
-			require("dapui").setup()
-		end,
-		requires = { "mfussenegger/nvim-dap" },
-	},
-
-	{
-		"theHamsta/nvim-dap-virtual-text",
-		config = function()
-			require("nvim-dap-virtual-text").setup()
-		end,
-		requires = { "mfussenegger/nvim-dap" },
-	},
-
-	{ "nvim-neotest/nvim-nio" },
 
 	-- better bdelete, close buffers without closing windows
 	{
@@ -177,12 +316,14 @@ return {
 		lazy = false,
 	},
 
+	-- NOTE: plenary is a dependency of several plugins above, keep it lazy
 	{
 		"nvim-lua/plenary.nvim",
 	},
 
 	{
 		"vimwiki/vimwiki",
+		event = "VeryLazy",
 	},
 
 	-- {
@@ -204,29 +345,29 @@ return {
 
 	{
 		"arnamak/stay-centered.nvim",
-		opts = function()
-			require("stay-centered").setup({
-				-- skip_filetypes = {"lua", "typescript"},
-			})
-		end,
+		opts = {},
 	},
 
 	-- tailwind-tools.lua
+	-- server.override = false: the server itself is started natively via
+	-- vim.lsp.enable("tailwindcss") (see configs/lsp/init.lua). Letting
+	-- tailwind-tools start it would call lspconfig.tailwindcss.setup(), which
+	-- uses the deprecated require('lspconfig') framework. Its color/conceal
+	-- features keep working: its setup() still registers an LspAttach hook.
 	{
 		"luckasRanarison/tailwind-tools.nvim",
 		name = "tailwind-tools",
 		build = ":UpdateRemotePlugins",
+		ft = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte", "astro" },
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter",
 			"nvim-telescope/telescope.nvim", -- optional
 			"neovim/nvim-lspconfig", -- optional
 		},
-		opts = {}, -- your configuration
+		opts = {
+			server = { override = false },
+		},
 	},
-
-	-- {
-	-- 		"3rd/image.nvim",
-	-- },
 
 	{
 		"skardyy/neo-img",
@@ -257,79 +398,26 @@ return {
 		end,
 	},
 
-	-- {
-	-- 	"f-person/auto-dark-mode.nvim",
-	-- 	lazy = false,
-	-- 	config = function()
-	-- 		local auto_dark_mode = require("auto-dark-mode")
-	--
-	-- 		local function change_theme(theme_name)
-	-- 			print("Changing theme to: " .. theme_name)
-	-- 			-- Set the theme name
-	-- 			vim.g.nvchad_theme = theme_name
-	-- 			-- Clear theme cache and reload
-	-- 			package.loaded["base46"] = nil
-	-- 			package.loaded["base46.themes." .. theme_name] = nil
-	-- 			require("base46").load_all_highlights()
-	-- 			-- Force UI refresh
-	-- 			vim.cmd("redraw!")
-	-- 			-- Trigger theme reload events
-	-- 			vim.api.nvim_exec_autocmds("User", { pattern = "NvChadThemeReload" })
-	-- 		end
-	--
-	-- 		local function set_dark_mode()
-	-- 			print("Setting dark mode theme...")
-	-- 			vim.schedule(function()
-	-- 				change_theme("poimandres")
-	-- 				print("Dark mode theme set!")
-	-- 			end)
-	-- 		end
-	--
-	-- 		local function set_light_mode()
-	-- 			print("Setting light mode theme...")
-	-- 			vim.schedule(function()
-	-- 				change_theme("flexoki-light")
-	-- 				print("Light mode theme set!")
-	-- 			end)
-	-- 		end
-	--
-	-- 		auto_dark_mode.setup({
-	-- 			update_interval = 500,
-	-- 			set_dark_mode = set_dark_mode,
-	-- 			set_light_mode = set_light_mode,
-	-- 		})
-	--
-	-- 		-- Set initial theme based on current system appearance
-	-- 		local handle = io.popen('defaults read -g AppleInterfaceStyle 2>/dev/null')
-	-- 		local result = handle and handle:read("*a") or ""
-	-- 		handle:close()
-	--
-	-- 		if result:match("Dark") then
-	-- 			set_dark_mode()
-	-- 		else
-	-- 			set_light_mode()
-	-- 		end
-	--
-	-- 		auto_dark_mode.init()
-	-- 	end,
-	-- },
-
 	{
 		"lukas-reineke/indent-blankline.nvim",
-		main = "ibl",
-		---@module "ibl"
-		---@type ibl.config
-		opts = {},
 	},
 
 	{
 		"sindrets/diffview.nvim",
+		cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewRefresh", "DiffviewFileHistory" },
+		config = function()
+			overrides.load_base46_cache "diffview"
+		end,
 	},
 
 	{
 		"akinsho/git-conflict.nvim",
 		version = "*",
-		config = true,
+		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			overrides.load_base46_cache "git-conflict"
+			require("git-conflict").setup()
+		end,
 	},
 
 	{
@@ -344,12 +432,4 @@ return {
 	--   "NvChad/nvim-colorizer.lua",
 	--   enabled = false
 	-- },
-
-	-- All NvChad plugins are lazy-loaded by default
-	-- For a plugin to be loaded, you will need to set either `ft`, `cmd`, `keys`, `event`, or set `lazy = false`
-	-- If you want a plugin to load on startup, add `lazy = false` to a plugin spec, for example
-	-- {
-	--   "mg979/vim-visual-multi",
-	--   lazy = false,
-	-- }
 }

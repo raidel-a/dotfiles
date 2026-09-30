@@ -1,54 +1,77 @@
 -- autocmds.lua
+--
+-- NOTE: `nvchad.autocmds` is deliberately required from init.lua *before* this
+-- module, because it emits the `User FilePost` event that most lazy-loaded
+-- plugins (nvim-lspconfig, conform, indent-blankline, ...) are waiting on.
+
 local M = {}
 
--- Constants
-local FOCUSED_BG = "#222f3f"
-local UNFOCUSED_BG = "#222a3a"
+-- Sidebar filetypes that keep an emphasized current-line, dimmed when unfocused.
+-- (The NvimTree* groups are reused for all of them; they are just styling.)
+local sidebar_filetypes = {
+	NvimTree = true,
+	Trouble = true,
+	mason = true,
+	lazy = true,
+	help = true,
+	qf = true,
+}
 
--- Helper functions
-local function setup_nvim_tree_highlights()
-	-- Set up NvimTreeTransparentCursor
-	vim.api.nvim_set_hl(0, "NvimTreeTransparentCursor", { blend = 100, nocombine = true })
+-- Style a single window as active or inactive. Everything touched here is
+-- window-local, so there is no global state to leak or restore and no
+-- scheduling: each focus event styles exactly one window.
+local function style_window(win, active)
+	if not vim.api.nvim_win_is_valid(win) then
+		return
+	end
 
-	-- Set up NvimTreeCursorLine
-	vim.api.nvim_set_hl(0, "NvimTreeCursorLine", {
-		-- bg = FOCUSED_BG,
-		bold = true,
-		underline = true,
-	})
+	local buf = vim.api.nvim_win_get_buf(win)
+	local filetype = vim.api.nvim_get_option_value("filetype", { buf = buf })
+	local buftype = vim.api.nvim_get_option_value("buftype", { buf = buf })
 
-	-- Set up NvimTreeCursorLineNC
-	vim.api.nvim_set_hl(0, "NvimTreeCursorLineNC", {
-		-- bg = UNFOCUSED_BG
-		-- italic = true,
-		underdashed = true,
-	})
+	-- Terminals never get a cursorline
+	if buftype == "terminal" or buftype == "prompt" then
+		vim.api.nvim_set_option_value("cursorline", false, { win = win })
+		return
+	end
+
+	if sidebar_filetypes[filetype] then
+		vim.api.nvim_set_option_value("cursorline", true, { win = win })
+		local hl_group = active and "NvimTreeCursorLine" or "NvimTreeCursorLineNC"
+		vim.api.nvim_set_option_value("winhighlight", "CursorLine:" .. hl_group, { win = win })
+		return
+	end
+
+	-- Normal buffers: cursorline only where focus is
+	vim.api.nvim_set_option_value("cursorline", active, { win = win })
 end
 
-local function set_cursor_and_line_appearance()
-	local current_win = vim.api.nvim_get_current_win()
-	local current_buf = vim.api.nvim_win_get_buf(current_win)
-	local filetype = vim.api.nvim_buf_get_option(current_buf, "filetype")
+local function style_current(active)
+	style_window(vim.api.nvim_get_current_win(), active)
+end
 
-	-- Set cursor appearance
-	if filetype == "NvimTree" then
-		vim.opt_local.guicursor = "a:NvimTreeTransparentCursor"
-		vim.opt_local.cursorline = true
-	else
-		vim.opt_local.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20"
+-- In the NvimTree window the line highlight marks the position, so the
+-- physical cursor is hidden while the tree has focus. guicursor is
+-- global-only, hence a single synchronous toggle (no per-buffer writes,
+-- no scheduling): WinEnter/BufEnter decide, CmdlineEnter always restores
+-- so `:` stays usable, CmdlineLeave re-evaluates.
+local default_guicursor = vim.o.guicursor
+local cursor_hidden = false
+
+local function set_cursor_hidden(hidden)
+	if hidden == cursor_hidden then
+		return
 	end
+	cursor_hidden = hidden
+	vim.o.guicursor = hidden and "a:NvimTreeHiddenCursor" or default_guicursor
+end
 
-	-- Set cursorline appearance for all windows
-	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		local buf = vim.api.nvim_win_get_buf(win)
-		local win_filetype = vim.api.nvim_buf_get_option(buf, "filetype")
-		local is_focused = win == current_win
-
-		if win_filetype == "NvimTree" then
-			local hl_group = is_focused and "NvimTreeCursorLine" or "NvimTreeCursorLineNC"
-			vim.api.nvim_win_set_option(win, "winhighlight", "CursorLine:" .. hl_group)
-		end
+local function update_tree_cursor()
+	local buf = vim.api.nvim_get_current_buf()
+	if not vim.api.nvim_buf_is_valid(buf) then
+		return
 	end
+	set_cursor_hidden(vim.api.nvim_get_option_value("filetype", { buf = buf }) == "NvimTree")
 end
 
 function M.setup()
@@ -59,32 +82,94 @@ function M.setup()
 	vim.api.nvim_create_autocmd("VimEnter", {
 		group = augroup,
 		callback = function(data)
-			local is_directory = vim.fn.isdirectory(data.file) == 1
-			if is_directory then
+			if vim.fn.isdirectory(data.file) == 1 then
 				vim.cmd.cd(data.file)
 				require("nvim-tree.api").tree.open()
 			end
 		end,
 	})
 
-	-- Setup cursor and highlights
-	setup_nvim_tree_highlights()
-
-	-- Update cursor and highlights on window/buffer events
-	vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "WinLeave", "ColorScheme" }, {
+	-- highlight yank
+	vim.api.nvim_create_autocmd("TextYankPost", {
 		group = augroup,
 		callback = function()
-			vim.schedule(function()
-				setup_nvim_tree_highlights()
-				set_cursor_and_line_appearance()
-			end)
+			vim.highlight.on_yank { timeout = 80 }
 		end,
 	})
 
-	-- Restore cursor on vim exit
-	vim.api.nvim_create_autocmd("VimLeave", {
+	-- wrap git commit body message lines at 72 characters
+	vim.api.nvim_create_autocmd("FileType", {
 		group = augroup,
-		command = "set guicursor=a:block-blinkon0",
+		pattern = "gitcommit",
+		callback = function(args)
+			vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+				group = augroup,
+				buffer = args.buf,
+				callback = function()
+					vim.opt_local.textwidth = vim.fn.line(".") == 1 and 50 or 72
+				end,
+			})
+		end,
+	})
+
+	-- Dim the window being left, light up the one being entered. During
+	-- WinLeave the current window is still the leaving one; during WinEnter
+	-- it is already the entering one, so each event styles exactly one window.
+	style_current(true)
+	update_tree_cursor()
+
+	vim.api.nvim_create_autocmd("WinLeave", {
+		group = augroup,
+		callback = function()
+			style_current(false)
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("WinEnter", {
+		group = augroup,
+		callback = function()
+			style_current(true)
+			update_tree_cursor()
+		end,
+	})
+
+	-- Same-window buffer changes (e.g. opening a terminal or help page):
+	-- re-evaluate the current window as active.
+	vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
+		group = augroup,
+		callback = function()
+			style_current(true)
+			update_tree_cursor()
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("TermOpen", {
+		group = augroup,
+		callback = function()
+			style_current(true)
+		end,
+	})
+
+	-- The hidden cursor also covers the cmdline, so always show it there.
+	vim.api.nvim_create_autocmd("CmdlineEnter", {
+		group = augroup,
+		callback = function()
+			set_cursor_hidden(false)
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("CmdlineLeave", {
+		group = augroup,
+		callback = function()
+			update_tree_cursor()
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = augroup,
+		callback = function()
+			style_current(true)
+		end,
 	})
 end
 

@@ -2,7 +2,8 @@ local M = {}
 
 M.adapter = {
 	type = "executable",
-	command = "/usr/bin/lldb-vscode",
+	-- Apple renamed lldb-vscode to lldb-dap; /usr/bin/ no longer ships either.
+	command = "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb-dap",
 	name = "lldb",
 }
 

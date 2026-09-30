@@ -6,7 +6,7 @@ vim.env.PATH = "/opt/homebrew/bin:" .. vim.env.PATH
 -- bootstrap lazy and all plugins
 local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
 
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   local repo = "https://github.com/folke/lazy.nvim.git"
   vim.fn.system { "git", "clone", "--filter=blob:none", repo, "--branch=stable", lazypath }
 end
@@ -35,50 +35,27 @@ require("lazy").setup({
 dofile(vim.g.base46_cache .. "defaults")
 dofile(vim.g.base46_cache .. "statusline")
 
--- require "autocmds"
-require('autocmds').setup()
+-- globals (P, R, RELOAD) before anything that might use them
+require "globals"
 
+-- nvchad.autocmds fires the `User FilePost` event, which lazy-loaded plugins
+-- (nvim-lspconfig, conform, indent-blankline, ...) wait on. Without it none of
+-- them ever load. It must run before the first buffer is read.
+require "nvchad.autocmds"
 
-vim.diagnostic.config(config)
+require("autocmds").setup()
 
 vim.schedule(function()
   require "mappings"
 end)
 
-require("globals")
+-- the python3 provider is enabled by default, this keeps it that way even if a
+-- plugin/after file disabled it
+local enable_providers = { "python3_provider" }
 
-vim.opt.shortmess:append("c") -- hide startup message
-
--- highlight yank
-vim.cmd([[
-augroup highlight_yank
-    autocmd!
-    autocmd TextYankPost * silent! lua require'vim.highlight'.on_yank({timeout = 80})
-augroup END
-]])
-
--- wrap git commit body message lines at 72 characters
-vim.cmd([["
-    augroup gitsetup
-        autocmd!
-        autocmd FileType gitcommit
-                \ autocmd CursorMoved,CursorMovedI * 
-                        \ let &l:textwidth = line('.') == 1 ? 50 : 72
-augroup end
-"]])
-
-local enable_providers = {
-	"python3_provider",
-	-- and so on
-}
-
-for _, plugin in pairs(enable_providers) do
-	vim.g["loaded_" .. plugin] = nil
-	vim.cmd("runtime " .. plugin)
+for _, provider in ipairs(enable_providers) do
+  vim.g["loaded_" .. provider] = nil
+  vim.cmd("runtime! plugin/" .. provider .. ".vim")
 end
 
-vim.g.python3_host_prog = "/bin/python3"
-
 dofile(vim.g.base46_cache .. "syntax")
-
--- require 'myinit'

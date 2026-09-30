@@ -4,31 +4,37 @@ local M = {}
 -- Path to overriding theme and highlights files
 local highlights = require("highlights")
 local header = require("header")
--- local overrides = require("configs.overrides")
 
 M.base46 = {
 	theme = "catppuccin",
 	theme_toggle = { "rosepine-dawn", "catppuccin" },
 	transparency = true,
 
+	-- Integrations for plugins NvChad doesn't manage. These are not compiled by
+	-- default; load them with configs.overrides.load_base46_cache.
+	integrations = {
+		"blink-pair",
+		"dap",
+		"diffview",
+		"flash",
+		"git-conflict",
+		"gitsigns",
+		"neogit",
+		"neotest",
+		"render-markdown",
+		"semantic_tokens",
+		"tiny-inline-diagnostic",
+		"trouble",
+		"lspsaga",
+	},
+
 	hl_override = highlights.override,
 	hl_add = highlights.add,
 }
 
--- M.plugins = "plugins"
-
 M.nvdash = {
 	load_on_startup = true,
 	header = header,
-	-- buttons = {
-	-- { "  Find File", ", f f", "Telescope find_files" },
-	-- { "󰈚  Recent Files", ", f o", "Telescope oldfiles" },
-	-- { "󰈭  Find Word", ", f w", "Telescope live_grep" },
-	-- { "  Bookmarks", ", m a", "Telescope marks" },
-	-- { "  Themes", ", t h", "Telescope themes" },
-	-- { "  Mappings", ", c h", "NvCheatsheet" },
-	-- { "󰩈  Quit", ";q", "quit" },
-	-- },
 }
 
 M.ui = {
