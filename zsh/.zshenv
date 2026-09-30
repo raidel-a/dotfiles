@@ -8,8 +8,17 @@ export HOMEBREW_PREFIX="$(brew --prefix)"
 
 # XDG Base Directory specification
 export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_STATE_HOME="$HOME/.local/state"
 export ZDOTDIR="${ZDOTDIR:-$HOME/.config/zsh}"
 export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
+
+# XDG relocations (2026-09-15 home-declutter)
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
+export PYTHONHISTORY="$XDG_STATE_HOME/python/history"
+export SQLITE_HISTORY="$XDG_STATE_HOME/sqlite/history"
+# NOTE: no VIMINIT here (2026-09-15 fix) - nvim reads $VIMINIT too and aliases
+# viminfofile to its shada path, which corrupts both. Legacy vim is redirected
+# via ~/.vimrc instead (vim-only file, nvim ignores it).
 
 # History configuration
 export HISTFILE="$ZDOTDIR/.zhistory"
@@ -20,13 +29,11 @@ export SAVEHIST=10000
 export EDITOR=nvim
 export VISUAL=nvim
 
-# Base path configuration
-export PATH="$XDG_CONFIG_HOME/bin:$PATH"
+# NOTE: former $XDG_CONFIG_HOME/bin prepend removed 2026-09-15 (bin dirs merged:
+# ~/.config/bin was empty; ~/.local/bin is canonical and already prepended in path.zsh).
 
-# Python user binaries (version-agnostic)
-for python_bin in $HOME/Library/Python/*/bin; do
-  [[ -d "$python_bin" ]] && export PATH="$PATH:$python_bin"
-done
+# NOTE: legacy ~/Library/Python/*/bin entries removed 2026-09-15 (full PATH overhaul,
+# standardize on brew/mise python). Old loop kept in git/backup at ~/.config/zsh.bak.*.
 
 # Custom directories
 export SCREENSHOT="$HOME/Pictures/Screenshots"
