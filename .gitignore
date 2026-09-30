@@ -13,4 +13,4 @@ wezterm/wezterm-type
 
 !git/config
 !ghostty/
-!ghostty/config
+!ghostty/**
