@@ -35,10 +35,10 @@ if [ -d "$DOTFILES_DIR/Fonts" ]; then
 	echo "Setting up fonts..."
 	mkdir -p "$HOME/.local/share/fonts"
 
-	# Check if MapleMonoNerdFont needs to be downloaded
-	if [ ! -d "$DOTFILES_DIR/Fonts/MapleMonoNerdFont" ]; then
-		FONT_LINK="https://github.com/raidel-a/dotfiles/releases/download/v1.0.0/MapleMonoNerdFont.zip"
-		FONT_NAME="MapleMonoNerdFont.zip"
+	# Check if MapleMonoNF-CN needs to be downloaded
+	if [ ! -d "$DOTFILES_DIR/Fonts/MapleMonoNF-CN" ]; then
+		FONT_LINK="https://github.com/raidel-a/dotfiles/releases/download/v1.1.0/MapleMonoNF-CN.zip"
+		FONT_NAME="MapleMonoNF-CN.zip"
 
 		echo "Downloading fonts from $FONT_LINK..."
 		wget -q "$FONT_LINK" -O "/tmp/$FONT_NAME" || echo "Font download failed, skipping..."

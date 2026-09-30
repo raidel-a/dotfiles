@@ -11,12 +11,13 @@ ln -s "$HOME/.config/zsh/zshenv" "$HOME/.zshenv"
 zsh
 
 
-link=https://github.com/raidel-a/dotfiles/releases/download/v1.0.0/MapleMonoNerdFont.zip
-name=MapleMonoNerdFont.zip
+link=https://github.com/raidel-a/dotfiles/releases/download/v1.1.0/MapleMonoNF-CN.zip
+name=MapleMonoNF-CN.zip
 echo "Downloading fonts..."
 echo "${link}"
 wget $link
 echo "Unzipping Font: ${name}..."
-unzip $name -d ./Fonts
+unzip -o "$name" -d "$HOME/Library/Fonts"
+rm -f "$name"
 fc-cache -fv
 echo "Downloaded and unzipped ${name}"

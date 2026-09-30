@@ -86,7 +86,7 @@ return {
 	},
 	font = wezterm.font_with_fallback({
 		{
-			family = "Maple Mono NF",
+			family = "Maple Mono NF CN",
 			weight = "Regular",
 		},
 		{
