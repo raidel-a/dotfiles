@@ -9,6 +9,9 @@ theme = light:TokyoNight Day,dark:Ayu
 # ---- Font ----
 font-family = Maple Mono NF CN
 font-family = Symbols Nerd Font
+# Herdr agent logos, built by Fonts/herdr-agent-icons/build.py.
+# Listed last so it only supplies the U+E00B-U+E012 agent glyphs.
+font-family = Herdr Agent Icons
 font-size = 15
 
 # ---- Window ----
@@ -18,6 +21,12 @@ window-padding-x = 0
 window-padding-y = 3,0
 window-inherit-working-directory = false
 window-subtitle = working-directory
+
+# ---- Updates ----
+# Prerelease channel. Needed because 1.3.1 predates macOS 27 support and its
+# titlebar tabs render clipped (ghostty-org/ghostty discussion #14421).
+# Revert to `stable` once 1.4.0 ships - that release contains the fix.
+auto-update-channel = tip
 
 # ---- Tabs ----
 tab-inherit-working-directory = false
