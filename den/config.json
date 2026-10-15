@@ -1,0 +1,18 @@
+{
+    "projectDirs": [
+        "/Users/rai/Developer/code"
+    ],
+    "preferences": {
+        "defaultEditor": "code",
+        "editorList": [
+            "code",
+            "vim",
+            "nano"
+        ],
+        "defaultFileManager": "",
+        "showHiddenFiles": false,
+        "showGitStatus": true,
+        "theme": "default",
+        "projectListTitle": "Your Projects"
+    }
+}

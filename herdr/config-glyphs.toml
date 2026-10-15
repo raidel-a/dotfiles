@@ -1,0 +1,91 @@
+onboarding = false
+[ui]
+prompt_new_tab_name = false
+hide_tab_bar_when_single_tab = true
+sidebar_collapsed_mode = "hidden"
+pane_gaps = false
+tab_bar_right = [
+  { type = "text", text = " " },
+  { type = "zoom" },
+  { type = "hostname" },
+  { type = "datetime", format = "%H:%M" },
+  { type = "command", command = "~/.config/herdr/status.sh", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "text", text = " " },
+]
+tab_bar_right_separator = " | "
+# window_title = "{hostname}: {workspace}"
+tab_bar_position = "bottom"
+
+show_agent_labels_on_pane_borders = true
+status_indicators = "symbols"
+agent_panel_sort = "priority"
+
+[keys]
+prefix = "ctrl+h"
+
+[[keys.command]]
+key = "prefix+e"
+type = "plugin_action"
+command = "chmarax.herdr-nvim.toggle"
+description = "nvim sidebar"
+
+[[keys.command]]
+key = "prefix+o"
+type = "plugin_action"
+command = "chmarax.herdr-nvim.pick-file"
+description = "open file from agent output"
+
+[ui.toast]
+delivery = "herdr"
+
+[theme]
+name = "terminal"
+auto_switch = false
+
+[ui.sound]
+enabled = false
+
+
+[experimental]
+allow_nested = true
+
+[ui.sidebar.chrome]
+spaces_title = "   spaces"
+agents_title = "   agents"
+machines_title = "   machines"
+sort_grouped = "  "
+sort_priority = " 󰥕 "
+# No dot between the plus and the hostname.
+new_workspace_separator = ""
+new_workspace = "   "
+menu = "  "
+menu_attention = " 󱈸   "
+machine_online = "   "
+# No machine status shows a word now, so connecting and reconnecting are
+# told apart by glyph alone. These two are deliberately different.
+machine_connecting = " 󱘖  "
+machine_reconnecting = " 󱘖  "
+# Attention has two causes. Severity comes from colour, so the two glyphs
+# only need to differ to be tellable apart: red for a real failure, a
+# secondary accent for an auth prompt. Verified: nf-md-alert / md-key_alert.
+machine_attention = " 󱈸 󰈈  "
+machine_attention_auth = " 󱈸 󰒃  "
+machine_disabled = "   "
+collapse = "󰜱 "
+
+[ui.sidebar.agents]
+# Tab on its own line under machine + workspace, instead of appended to them.
+rows = [["state_icon", "machine", "workspace"], ["agent", "tab"]]
+
+# Agent logos, from the icon font built by
+# ~/Developer/repos/herdr-agent-icons/build.py out of herdr.dev's own SVGs.
+# Codepoints are the Private Use Area slots the font assigns.
+[ui.sidebar.agents.agent_icons]
+claude   = "\ue00b"
+codex    = "\ue00c"
+cursor   = "\ue00d"
+copilot  = "\ue00e"
+grok     = "\ue00f"
+hermes   = "\ue010"
+opencode = "\ue011"
+pi       = "\ue012"

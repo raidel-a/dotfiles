@@ -35,6 +35,45 @@
 !zsh/
 !zsh/**
 
+# ---- Added during the 2026-10-14 config triage ------------------------------
+# Whole-directory pairs where the directory holds config and nothing bulky.
+!btop/
+!btop/**
+!den/
+!den/**
+!eza/
+!eza/**
+!fastfetch/
+!fastfetch/**
+!mise/
+!mise/**
+!npm/
+!npm/**
+!process-compose/
+!process-compose/**
+!scdl/
+!scdl/**
+
+# yazi drops *.toml-<epoch> backups beside the real config, so this is
+# limited to .toml rather than the whole directory.
+!yazi/
+!yazi/*.toml
+
+# herdr: config only. plugins/ holds two git checkouts (86M) and
+# session-snapshots/ is runtime state. Must not be narrowed below
+# config.toml/config-glyphs.toml - zsh/.zshrc and the Herdr Agent Icons
+# font both depend on config-glyphs.toml existing.
+!herdr/
+herdr/*
+!herdr/config.toml
+!herdr/config-glyphs.toml
+
+# spotify-player: config plus the theme helper, never myenv/ (a 19M venv).
+!spotify-player/
+spotify-player/*
+!spotify-player/*.toml
+!spotify-player/theme_parse.py
+
 # ---------------------------------------------------------------------------
 # Tracked top-level files
 # ---------------------------------------------------------------------------
@@ -118,8 +157,12 @@ Fonts/herdr-agent-icons/*.pyc
 # above on purpose: if anyone ever removes that wildcard, these must not
 # become one `git add .` away from a PUBLIC repo.
 #
-# Verified credential-bearing 2026-10-14: ngrok, spicetify, github-copilot,
-# opencode, gcloud, herdr, configstore.
+# Verified credential-bearing 2026-10-14: ngrok, github-copilot, opencode,
+# gcloud, configstore.
+#
+# NOTE: herdr/ is deliberately NOT here. Its two config files are tracked
+# via the block above, and an ignored directory cannot have tracked files
+# inside it. Everything else under herdr/ is denied by `herdr/*`.
 # ===========================================================================
 .claude/
 .copilot/
@@ -127,12 +170,9 @@ configstore/
 gcloud/
 gh/
 github-copilot/
-herdr/
 herdr-automatic-rename/
-herdr-dev/
 ngrok/
 opencode/
-spicetify/
 tailscale-browser-ext/
 turso-new/
 turso-shelly-test/
