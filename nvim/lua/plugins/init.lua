@@ -114,10 +114,7 @@ return {
 		dependencies = {
 			{
 				"nvim-telescope/telescope-fzf-native.nvim",
-				-- Pinned: Homebrew's `make` formula was removed and /opt/homebrew/bin
-				-- precedes /usr/bin in PATH, so a bare `make` is ambiguous. This is
-				-- Apple's GNU Make 3.81, which the plugin's Makefile supports.
-				build = "/usr/bin/make",
+				build = "make",
 			},
 		},
 		opts = function()
