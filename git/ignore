@@ -1,0 +1,24 @@
+# Global git excludes.
+#
+# Git reads this automatically: core.excludesFile defaults to
+# $XDG_CONFIG_HOME/git/ignore, i.e. ~/.config/git/ignore. This repo clones to
+# ~/.config, so the tracked file lands exactly where git looks. That is why
+# git/config no longer sets a machine-specific core.excludesFile pointing at
+# ~/.gitignore_global.
+#
+# NOTE: patterns in a repository's own .gitignore override this file. The
+# dotfiles repo mirrors the entries below in its .gitignore, because its
+# `!dir/**` negations would otherwise resurrect them.
+
+# ---- Editor / OS noise -----------------------------------------------------
+*~
+.DS_Store
+
+# ---- Agent instruction files stay local to each machine --------------------
+CLAUDE.md
+.claude/
+.ignore/
+AGENTS.MD
+
+# ---- Claude Code local settings --------------------------------------------
+**/.claude/settings.local.json
