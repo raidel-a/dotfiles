@@ -35,3 +35,24 @@ path=(${path:#\~/.dotnet/tools})
 path=(${path:#$HOME/.dotnet/tools})
 typeset -U PATH path
 export PATH
+
+# herdr-automatic-rename: live tab naming hook
+for _f in $HOME/.config/herdr/plugins/github/herdr-automatic-rename-*/shell/hook.zsh(N); do
+  source $_f; break
+done
+
+# herdrr: attach to the running herdr session using a locally patched herdr that
+# renders the Nerd Font sidebar glyph labels. The labels live in
+# ~/.config/herdr/config-glyphs.toml, which the wrapper points herdr at via
+# HERDR_CONFIG_PATH, so stock `herdr` keeps reading the plain config.toml.
+#   herdrr          attach to the default session
+#   herdrr NAME     attach to a named session
+# After editing glyphs: detach, then re-run herdrr (or use the reload-config
+# action from inside herdr) to pick them up.
+herdrr() {
+  if (( $# )); then
+    "$HOME/.local/bin/herdr-chrome" session attach "$@"
+  else
+    "$HOME/.local/bin/herdr-chrome" session attach default
+  fi
+}
