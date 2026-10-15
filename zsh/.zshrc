@@ -4,9 +4,14 @@
 # Put tool init in conf.d/ instead (see 00-kiro-pre.zsh, 99-kiro-post.zsh,
 # plugins.zsh). If an installer re-adds blocks here, move them to conf.d/.
 
-# Enable Starship's instant prompt
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/starship/init.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/starship/init.zsh"
+# Enable Starship's instant prompt (once-guard: re-sourcing starship init
+# while its zle-keymap-select wrapper is installed makes the wrapper call
+# itself -> "maximum nested function level reached" on next ESC)
+if (( ! ${+_STARSHIP_INSTANT_SOURCED} )); then
+  if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/starship/init.zsh" ]]; then
+    source "${XDG_CACHE_HOME:-$HOME/.cache}/starship/init.zsh"
+  fi
+  _STARSHIP_INSTANT_SOURCED=1
 fi
 
 # Load all modular configurations
