@@ -4,7 +4,7 @@
 	name = Raidel
 	email = 15664418+raidel-a@users.noreply.github.com
 [filter "lfs"]
-	process = git-lfs filter-process
+	process = /opt/homebrew/bin/git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
