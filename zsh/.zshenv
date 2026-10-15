@@ -3,8 +3,10 @@
 # Initialize Homebrew first
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Cache Homebrew prefix for performance
-export HOMEBREW_PREFIX="$(brew --prefix)"
+# HOMEBREW_PREFIX is already set by `brew shellenv` above; keep a hardcoded
+# fallback so we never fork `brew --prefix` (~30ms) on every shell.
+: "${HOMEBREW_PREFIX:=/opt/homebrew}"
+export HOMEBREW_PREFIX
 
 # XDG Base Directory specification
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -41,4 +43,3 @@ export SCREENSHOT="$HOME/Pictures/Screenshots"
 # Visual Studio Code (only if installed)
 [[ -d "/Applications/Visual Studio Code - Insiders.app" ]] && \
   export PATH="$PATH:/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin"
-
