@@ -19,10 +19,24 @@ if [ -f "$DOTFILES_DIR/Brewfile" ]; then
 	rm /tmp/Brewfile.linux
 fi
 
-# Create symlinks for zsh config
+# Create symlinks for zsh config.
+# The dotfiles are tracked as dotfiles (zsh/.zshenv), so the link targets must
+# include the leading dot. ~/.zshenv is the essential one: zsh reads it from
+# $HOME before ZDOTDIR is set, and it is what sets ZDOTDIR to $DOTFILES_DIR/zsh.
+# ~/.zshrc is vestigial for the same reason (zsh reads $ZDOTDIR/.zshrc) but is
+# kept so shells started without the ZDOTDIR export still find a config.
 echo "Creating zsh symlinks..."
-ln -sf "$DOTFILES_DIR/zsh/zshrc" "$HOME/.zshrc"
-ln -sf "$DOTFILES_DIR/zsh/zshenv" "$HOME/.zshenv"
+ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+ln -sf "$DOTFILES_DIR/zsh/.zshenv" "$HOME/.zshenv"
+
+# Sanity-check the links resolved, rather than reporting success blindly.
+for link in "$HOME/.zshrc" "$HOME/.zshenv"; do
+	if [ -e "$link" ]; then
+		echo "  linked $link -> $(readlink "$link")"
+	else
+		echo "  WARNING: $link is a broken symlink" >&2
+	fi
+done
 
 # WezTerm config is already in .config, no need to symlink
 echo "WezTerm config available at ~/.config/wezterm"

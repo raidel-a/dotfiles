@@ -4,10 +4,13 @@
 eval "$(/opt/homebrew/bin/brew shellenv)"
 # install required brew packages
 brew bundle --file ~/.config/Brewfile
-# create root .zshrc symlink to .config/zsh/zsshrc
-ln -s "$HOME/.config/zsh/zshrc" "$HOME/.zshrc"
-# create root .zshenv symlink to .config/zsh/zshenv
-ln -s "$HOME/.config/zsh/zshenv" "$HOME/.zshenv"
+# create root .zshrc symlink to .config/zsh/.zshrc
+# NOTE: the targets are dotfiles (zsh/.zshrc), so the leading dot is required.
+# ~/.zshenv is the load-bearing one: zsh reads it from $HOME before ZDOTDIR is
+# set, and it is what points ZDOTDIR at ~/.config/zsh.
+ln -sf "$HOME/.config/zsh/.zshrc" "$HOME/.zshrc"
+# create root .zshenv symlink to .config/zsh/.zshenv
+ln -sf "$HOME/.config/zsh/.zshenv" "$HOME/.zshenv"
 zsh
 
 
