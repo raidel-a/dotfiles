@@ -47,28 +47,63 @@ echo "Neovim config available at ~/.config/nvim"
 # Install fonts if on Linux (for potential GUI usage)
 if [ -d "$DOTFILES_DIR/Fonts" ]; then
 	echo "Setting up fonts..."
-	mkdir -p "$HOME/.local/share/fonts"
+	FONT_DIR="$HOME/.local/share/fonts"
+	mkdir -p "$FONT_DIR"
 
-	# Check if MapleMonoNF-CN needs to be downloaded
-	if [ ! -d "$DOTFILES_DIR/Fonts/MapleMonoNF-CN" ]; then
-		FONT_LINK="https://github.com/raidel-a/dotfiles/releases/download/v1.1.0/MapleMonoNF-CN.zip"
-		FONT_NAME="MapleMonoNF-CN.zip"
+	# Both archives are release assets rather than tracked files: they are
+	# multi-megabyte binaries and the release host already serves
+	# MapleMonoNF-CN. Cached under Fonts/ on first run (both paths ignored).
+	RELEASE_URL="https://github.com/raidel-a/dotfiles/releases/download/v1.1.0"
 
-		echo "Downloading fonts from $FONT_LINK..."
-		wget -q "$FONT_LINK" -O "/tmp/$FONT_NAME" || echo "Font download failed, skipping..."
+	# fetch_archive <zip-name>: extract into Fonts/<name-without-.zip>/ if
+	# absent. Prefers a copy already sitting in Fonts/ - which is what the
+	# move to release assets leaves behind - over re-downloading.
+	fetch_archive() {
+		zip_name="$1"
+		cache_dir="$DOTFILES_DIR/Fonts/${zip_name%.zip}"
+		zip_path="$DOTFILES_DIR/Fonts/$zip_name"
+		downloaded=""
 
-		if [ -f "/tmp/$FONT_NAME" ]; then
-			echo "Unzipping fonts..."
-			unzip -q "/tmp/$FONT_NAME" -d "$DOTFILES_DIR/Fonts" || echo "Font unzip failed, skipping..."
-			rm "/tmp/$FONT_NAME"
+		if [ -d "$cache_dir" ]; then
+			return 0
 		fi
-	fi
 
-	# Copy fonts to user directory
-	if [ -d "$DOTFILES_DIR/Fonts" ]; then
-		cp -r "$DOTFILES_DIR/Fonts/"* "$HOME/.local/share/fonts/" 2>/dev/null || true
-		fc-cache -fv >/dev/null 2>&1 || echo "Font cache update failed, skipping..."
-	fi
+		if [ -f "$zip_path" ]; then
+			echo "Using local Fonts/$zip_name"
+		else
+			zip_path="/tmp/$zip_name"
+			downloaded="yes"
+			echo "Downloading $zip_name..."
+			if ! wget -q "$RELEASE_URL/$zip_name" -O "$zip_path"; then
+				echo "  $zip_name download failed, skipping..."
+				return 0
+			fi
+		fi
+
+		if unzip -q -o "$zip_path" -d "$cache_dir"; then
+			echo "  extracted to $cache_dir"
+		else
+			echo "  $zip_name unzip failed, skipping..."
+		fi
+
+		if [ -n "$downloaded" ]; then
+			rm -f "$zip_path"
+		fi
+		return 0
+	}
+
+	fetch_archive "MapleMonoNF-CN.zip"
+	fetch_archive "SymbolsNerdFont.zip"
+
+	# Copy font binaries only. The caches above also hold the zips and macOS
+	# resource-fork junk (__MACOSX/._*.ttf), which are themselves .ttf names
+	# and must not be installed as fonts.
+	find "$DOTFILES_DIR/Fonts" -type f \
+		\( -iname '*.ttf' -o -iname '*.otf' -o -iname '*.ttc' \) \
+		-not -path '*__MACOSX*' \
+		-exec cp -f {} "$FONT_DIR/" \; 2>/dev/null
+
+	fc-cache -fv >/dev/null 2>&1 || echo "Font cache update failed, skipping..."
 fi
 
 # Source zsh to set up environment
