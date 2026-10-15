@@ -15,7 +15,19 @@ echo "Installing Homebrew packages..."
 if [ -f "$DOTFILES_DIR/Brewfile" ]; then
 	# Filter out cask lines since they don't work on Linux
 	grep -v "^cask" "$DOTFILES_DIR/Brewfile" >/tmp/Brewfile.linux || true
-	brew bundle --file=/tmp/Brewfile.linux --no-lock || echo "Some packages may have failed, continuing..."
+
+	# Do NOT pass --no-lock. Homebrew 7 removed the flag and `brew bundle`
+	# rejects the whole invocation with a usage error, so this step installed
+	# nothing at all - and the old `|| echo "...continuing..."` made that
+	# failure read like success. Partial failure is still expected on Linux
+	# (some formulae are macOS-only), so this reports instead of aborting
+	# under the `set -e` above, but it no longer claims to have continued.
+	if brew bundle --file=/tmp/Brewfile.linux; then
+		echo "Homebrew packages installed"
+	else
+		echo "WARNING: brew bundle exited non-zero - some packages may be missing" >&2
+	fi
+
 	rm /tmp/Brewfile.linux
 fi
 
