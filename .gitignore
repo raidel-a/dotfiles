@@ -41,10 +41,8 @@
 !.gitignore
 !.gitmodules
 !Brewfile
-!Brewfile.lock.json
 !bootstrap
 !install.sh
-!old-starship.toml
 !starship.toml
 
 # ===========================================================================
@@ -55,6 +53,18 @@
 # ---- Secrets - never commit ------------------------------------------------
 .env
 key.txt
+
+# ---- Superseded / generated -------------------------------------------------
+# Superseded by starship.toml (untracked 2026-10-14).
+old-starship.toml
+# Unused: bootstrap greps Brewfile directly and install.sh passed --no-lock,
+# so nothing ever read this.
+#
+# CORRECTION 2026-10-14: an earlier note here claimed bootstrap would
+# regenerate this file. That was wrong. Homebrew 7 writes no lock at all
+# (verified on 7.0.9, with --file and with CWD discovery), and
+# `brew bundle dump` writes a Brewfile, not a lock. Nothing regenerates it.
+Brewfile.lock.json
 
 # ---- Mirrors of the global excludes file -----------------------------------
 # Patterns in this file OVERRIDE core.excludesFile, so the `!dir/**` negations
