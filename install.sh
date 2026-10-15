@@ -151,6 +151,13 @@ fi
 
 chmod 600 "$HOME/.ssh/authorized_keys"
 
+# Install the secret-scanning pre-commit hook. .git/hooks is not tracked, so a
+# fresh clone has no protection until this runs.
+if [ -f "$DOTFILES_DIR/git/hooks/pre-commit" ] && [ -d "$DOTFILES_DIR/.git/hooks" ]; then
+	echo "Installing pre-commit secret scan..."
+	install -m 755 "$DOTFILES_DIR/git/hooks/pre-commit" "$DOTFILES_DIR/.git/hooks/pre-commit"
+fi
+
 echo ""
 echo "Dotfiles setup complete!"
 echo "Configuration location: $DOTFILES_DIR"

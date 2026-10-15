@@ -1,0 +1,57 @@
+#!/bin/sh
+# pre-commit: refuse to commit credential-like content.
+#
+# Why this exists: this repo IS ~/.config. Its siblings - ngrok/, spicetify/,
+# gcloud/, opencode/, herdr/, github-copilot/, configstore/ - hold live
+# credentials, and the repository is PUBLIC. .gitignore keeps them out, but
+# `git add -f` overrides .gitignore silently. This hook is the layer that
+# force-add cannot bypass.
+#
+# Only lines this commit ADDS are scanned, so pre-existing content never blocks
+# unrelated work.
+#
+# Bypass when a match is provably a false positive (base64 inside a binary icon
+# trips the AWS-key shapes, for example):
+#     git commit --no-verify
+#
+# Install: install.sh copies this to .git/hooks/pre-commit. To do it by hand:
+#     install -m 755 git/hooks/pre-commit .git/hooks/pre-commit
+
+set -eu
+
+staged=$(mktemp)
+trap 'rm -f "$staged"' EXIT
+
+# Emit "<file>\t<added line>" for every line this commit introduces.
+git diff --cached -U0 --diff-filter=ACMR --no-color --no-ext-diff 2>/dev/null |
+	awk '
+		/^\+\+\+ b\// { file = substr($0, 7); next }
+		/^\+/ && !/^\+\+\+/ { print file "\t" substr($0, 2) }
+	' >"$staged"
+
+[ -s "$staged" ] || exit 0
+
+# Case-sensitive on purpose: base64 payloads frequently contain "asia"/"akia"
+# in lower case, and folding case makes those the dominant false positive.
+PATTERN='ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|ghs_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{32,}|sk-ant-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}|glpat-[A-Za-z0-9_-]{15,}|npm_[A-Za-z0-9]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
+
+[ -n "$(grep -E "$PATTERN" "$staged" || true)" ] || exit 0
+
+printf '\n' >&2
+printf 'pre-commit: refusing to commit credential-like content\n' >&2
+printf '\n' >&2
+printf '  files:\n' >&2
+
+grep -E "$PATTERN" "$staged" | cut -f1 | sort -u | sed 's/^/    /' >&2
+
+printf '\n  matches (redacted):\n' >&2
+grep -Eo "$PATTERN" "$staged" | sort -u | while IFS= read -r token; do
+	# Never echo the full secret to the terminal; show a prefix and length.
+	printf '    %s... (%s chars)\n' "$(printf '%s' "$token" | cut -c1-6)" "${#token}"
+done >&2
+
+printf '\n' >&2
+printf '  This repository is public. If this is a false positive, re-run as:\n' >&2
+printf '      git commit --no-verify\n\n' >&2
+
+exit 1
