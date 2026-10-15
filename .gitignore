@@ -1,16 +1,128 @@
-
-.env
-key.txt
-.DS_Store
-
-/.zsh_sessions
-.zsh_history
-.zcompdump
-
-wezterm/wezterm-type
-
+# ---------------------------------------------------------------------------
+# This directory IS ~/.config, so `git add .` must never be safe.
+#
+# Everything is denied by default; only the paths listed below are tracked.
+# ADDING A TRACKED DIRECTORY REQUIRES A MATCHING `!` PAIR HERE. Without it the
+# file is silently ignored and never commits - that is exactly how zsh/conf.d
+# (9 files) sat untracked after the 2026-10 XDG refactor.
+#
+# To audit for this class of bug:
+#   git ls-files --others --ignored --exclude-standard -- <dir>
+# ---------------------------------------------------------------------------
 *
 
-!git/config
+# ---------------------------------------------------------------------------
+# Tracked directories (dir, then contents - both lines are required)
+# ---------------------------------------------------------------------------
+!.devcontainer/
+!.devcontainer/**
+!Fonts/
+!Fonts/**
 !ghostty/
 !ghostty/**
+!git/
+!git/**
+!karabiner/
+!karabiner/**
+!lazydocker/
+!lazydocker/**
+!lazygit/
+!lazygit/**
+!nvim/
+!nvim/**
+!wezterm/
+!wezterm/**
+!zsh/
+!zsh/**
+
+# ---------------------------------------------------------------------------
+# Tracked top-level files
+# ---------------------------------------------------------------------------
+!.gitignore
+!.gitmodules
+!Brewfile
+!Brewfile.lock.json
+!bootstrap
+!install.sh
+!old-starship.toml
+!starship.toml
+
+# ===========================================================================
+# Re-ignores. These must come after the `!` rules above, since the last
+# matching pattern wins.
+# ===========================================================================
+
+# ---- Secrets - never commit ------------------------------------------------
+.env
+key.txt
+
+# ---- Mirrors of the global excludes file -----------------------------------
+# Patterns in this file OVERRIDE core.excludesFile, so the `!dir/**` negations
+# above would resurrect anything the global ~/.config/git/ignore blocks. These
+# entries keep that policy intact inside the tracked directories.
+.DS_Store
+*~
+CLAUDE.md
+.claude/
+.ignore/
+AGENTS.MD
+
+# ---- Machine-local overrides ----------------------------------------------
+# Optional git config included by git/config for host-specific values.
+git/config.local
+
+# ---- Karabiner: dated backups written on every config change --------------
+karabiner/automatic_backups/
+
+# ---- Neovim: scratch and logs ---------------------------------------------
+nvim/*.log
+nvim/nvim-healthcheck.md
+
+# ---- WezTerm --------------------------------------------------------------
+# key.txt is the devcontainer-multiplexing *private* key.
+wezterm/key.txt
+wezterm/.old/
+wezterm/*.bak
+wezterm/*.bck
+wezterm/wezterm-types/
+
+# ---- Zsh runtime state (history, completion cache, per-session logs) ------
+zsh/.zcompcache/
+zsh/.zcompdump*
+zsh/.zhistory
+zsh/.zsh_history
+zsh/.zsh_sessions/
+
+# ---- Fonts: fetched archives and in-place build artefacts -----------------
+# SymbolsNerdFont.zip is fetched from the v1.1.0 release by install.sh.
+Fonts/SymbolsNerdFont.zip
+Fonts/SymbolsNerdFont/
+Fonts/MapleMonoNF-CN/
+Fonts/herdr-agent-icons/.venv/
+Fonts/herdr-agent-icons/__pycache__/
+Fonts/herdr-agent-icons/.herdr-icon-cache/
+Fonts/herdr-agent-icons/*.pyc
+
+# ===========================================================================
+# Directories holding live credentials. Fully redundant with the `*` deny
+# above on purpose: if anyone ever removes that wildcard, these must not
+# become one `git add .` away from a PUBLIC repo.
+#
+# Verified credential-bearing 2026-10-14: ngrok, spicetify, github-copilot,
+# opencode, gcloud, herdr, configstore.
+# ===========================================================================
+.claude/
+.copilot/
+configstore/
+gcloud/
+gh/
+github-copilot/
+herdr/
+herdr-automatic-rename/
+herdr-dev/
+ngrok/
+opencode/
+spicetify/
+tailscale-browser-ext/
+turso-new/
+turso-shelly-test/
