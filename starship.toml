@@ -13,6 +13,10 @@ diverged = "<>"
 renamed = "r"
 deleted = "x"
 
+[git_metrics]
+disabled = false
+only_nonzero_diffs = true
+
 [aws]
 disabled = true
 
