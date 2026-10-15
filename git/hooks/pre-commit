@@ -33,7 +33,13 @@ git diff --cached -U0 --diff-filter=ACMR --no-color --no-ext-diff 2>/dev/null |
 
 # Case-sensitive on purpose: base64 payloads frequently contain "asia"/"akia"
 # in lower case, and folding case makes those the dominant false positive.
-PATTERN='ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|ghs_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{32,}|sk-ant-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}|glpat-[A-Za-z0-9_-]{15,}|npm_[A-Za-z0-9]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
+#
+# AGE-SECRET-KEY-1 covers age's native secret keys. The plugin variant is
+# included because it is the same class of material: AGE-PLUGIN-<NAME>-1<data>
+# (for example AGE-PLUGIN-YUBIKEY-1...). Both are bech32, so the payload is
+# upper-case alphanumerics; requiring 20+ characters keeps truncated strings
+# and prose references from tripping it.
+PATTERN='ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|ghs_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{32,}|sk-ant-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}|glpat-[A-Za-z0-9_-]{15,}|npm_[A-Za-z0-9]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AGE-SECRET-KEY-1[A-Z0-9]{20,}|AGE-PLUGIN-[A-Z0-9]+-1[A-Z0-9]{20,}'
 
 [ -n "$(grep -E "$PATTERN" "$staged" || true)" ] || exit 0
 
